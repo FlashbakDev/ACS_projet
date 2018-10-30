@@ -9,40 +9,51 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import rmi.IContract;
+import rmi.ClientRemote;
+import rmi.IServerRemote;
+import rmi.IMessageListener;
 
 /**
  *
  * @author Benjamin
  */
-public class Client extends Application {
+public class Client extends Application{
     
-    private IContract contract; 
-    private ScenesManager scenesManager;
+    private IServerRemote serverRemote; 
+    private ScenesManager view;
+    private ClientRemote clientRemote;
+    private List<String> eventMessages;
+    private long id;
 
     @Override
     public void start(Stage primaryStage) {
-
-        scenesManager = new ScenesManager(this, primaryStage);
-        scenesManager.switchScene(ScenesManager.SceneTypes.CONNECTION);
+        
+        eventMessages = new ArrayList<>();
+        id = 0;
+        view = new ScenesManager(this, primaryStage);
+        view.switchScene(ScenesManager.SceneTypes.CONNECTION);
     }
     
     public void onClickOnButton_connect(String ipAdress){
         
-        String url = "rmi://" + ipAdress + "/contract";
+        String url = "rmi://" + ipAdress + "/serverRemote";
 
         try {
+
+            serverRemote = (IServerRemote) Naming.lookup(url);
+            clientRemote = new ClientRemote(this);
+            id = serverRemote.connect(clientRemote);
+
+            view.switchScene(ScenesManager.SceneTypes.EVENTS);
             
-            contract = (IContract) Naming.lookup(url);
-            contract.connect();
-            
-            scenesManager.switchScene(ScenesManager.SceneTypes.EVENTS);
-            
-        } catch (MalformedURLException | NotBoundException | RemoteException ex) {
+        } catch(MalformedURLException| NotBoundException| RemoteException ex) {
             
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -51,16 +62,32 @@ public class Client extends Application {
     public void onClickOnButton_disconnect(){
         
         try {
-            contract.disconnect();
             
-            scenesManager.switchScene(ScenesManager.SceneTypes.CONNECTION);
+            serverRemote.disconnect(id);
+            UnicastRemoteObject.unexportObject(clientRemote, true);
+            
+            view.switchScene(ScenesManager.SceneTypes.CONNECTION);
             
         } catch (RemoteException ex) {
             
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    public void onMessageReceived(String message){
 
+        eventMessages.add(message);
+        view.addMessage(message);
+    }
+    
+
+    @Override
+    public void stop() throws Exception {
+        super.stop(); //To change body of generated methods, choose Tools | Templates.
+        
+        onClickOnButton_disconnect();
+    }
+    
     /**
      * @param args the command line arguments
      */

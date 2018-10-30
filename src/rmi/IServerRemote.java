@@ -12,11 +12,11 @@ import java.rmi.RemoteException;
  *
  * @author Benjamin
  */
-public interface IContract extends Remote {
+public interface IServerRemote extends Remote {
 
     String test() throws RemoteException;
     
-    boolean connect() throws RemoteException;
+    long connect(IMessageListener listener) throws RemoteException;
     
-    boolean disconnect() throws RemoteException;
+    boolean disconnect(long id) throws RemoteException;
 }

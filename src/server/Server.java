@@ -8,7 +8,8 @@ package server;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
-import rmi.Contract;
+import rmi.EventsManager;
+import rmi.ServerRemote;
 
 /**
  *
@@ -16,11 +17,12 @@ import rmi.Contract;
  */
 public class Server {
 
-    private Contract contract;
+    private ServerRemote serverRemote;
+    private EventsManager eventsManager;
     
     public Server() {
         
-        contract = null;
+        serverRemote = null;
     }
     
     public void Start(){
@@ -35,12 +37,14 @@ public class Server {
         
         try {
 
-            contract = new Contract();
+            serverRemote = new ServerRemote();
+            eventsManager = new EventsManager(serverRemote, null);
             System.out.println("Object created.");
             
-            Naming.rebind("contract", contract);
+            Naming.rebind("serverRemote", serverRemote);
             System.out.println("Object saves.");
             
+            eventsManager.start();
             System.out.println("Server ready.");
 
         } catch (MalformedURLException | RemoteException e) {
