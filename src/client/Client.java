@@ -64,6 +64,8 @@ public class Client extends Application{
             serverRemote.disconnect(id);
             UnicastRemoteObject.unexportObject(clientRemote, true);
             
+            id = 0;
+            
             view.switchScene(ScenesManager.SceneTypes.CONNECTION);
             
         } catch (RemoteException ex) {
@@ -82,8 +84,11 @@ public class Client extends Application{
     public void stop() throws Exception {
         super.stop(); //To change body of generated methods, choose Tools | Templates.
         
-        serverRemote.disconnect(id);
-        UnicastRemoteObject.unexportObject(clientRemote, true);
+        if(id > 0){
+            
+            serverRemote.disconnect(id);
+            UnicastRemoteObject.unexportObject(clientRemote, true);
+        }
     }
     
     /**

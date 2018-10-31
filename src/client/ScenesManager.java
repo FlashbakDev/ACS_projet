@@ -41,6 +41,7 @@ public class ScenesManager {
     private Stage stage;
     private final Map<SceneTypes, Scene> scenes;
     private TextArea textArea_eventMessages;
+    private SceneTypes sceneType;
     
     public ScenesManager(Client controller, Stage stage) {
     
@@ -48,25 +49,27 @@ public class ScenesManager {
         this.stage = stage;
         
         scenes = new HashMap<>();
-        buildScenes();
     }
     
     /**
      * Switch between scenes, if @param is SceneTypes.CONNECTION then stage 
      * resisibily is set to false.
      * 
-     * @param scene scene to switch to
+     * @param sceneType scene to switch to
      */
-    public void switchScene(SceneTypes scene){
+    public void switchScene(SceneTypes sceneType){
    
-        stage.setTitle(scene.toString());
-        stage.setScene(scenes.get(scene));
+        buildScenes();
+        
+        stage.setTitle(sceneType.toString());
+        stage.setScene(scenes.get(sceneType));
 
-        if(scene == SceneTypes.CONNECTION)
+        if(sceneType == SceneTypes.CONNECTION)
             stage.setResizable(false);
         else
             stage.setResizable(true);
         
+        this.sceneType = sceneType;
         stage.show();
     }
     
