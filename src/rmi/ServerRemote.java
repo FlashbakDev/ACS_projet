@@ -10,6 +10,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,6 +72,11 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
                         entry.getValue().connected = true;
                         entry.getValue().listener = listener;
                         
+                        List<String> lines = eventsManager.getPassedLines();
+                        for (String line : lines) {
+                            entry.getValue().listener.EventMessageReceived(line);
+                        }
+                        
                         return entry.getValue().getId();
                     }
                 }
@@ -121,7 +127,6 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     private long getNextId(){
         
         ids ++;
-        
         return ids;
     }
     

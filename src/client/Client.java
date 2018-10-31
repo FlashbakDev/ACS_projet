@@ -10,15 +10,12 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import rmi.EventMessagesListener;
 import rmi.IServerRemote;
-import rmi.IEventMessagesListener;
 
 /**
  *
@@ -63,7 +60,6 @@ public class Client extends Application{
             
             serverRemote.disconnect(id);
             UnicastRemoteObject.unexportObject(clientRemote, true);
-            
             id = 0;
             
             view.switchScene(ScenesManager.SceneTypes.CONNECTION);
@@ -79,7 +75,10 @@ public class Client extends Application{
         view.addMessage(message);
     }
     
-
+    /**
+     * Include clean server disconnection.
+     * @throws Exception 
+     */
     @Override
     public void stop() throws Exception {
         super.stop(); //To change body of generated methods, choose Tools | Templates.

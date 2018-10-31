@@ -41,6 +41,11 @@ public class ScenesManager {
     private Stage stage;
     private final Map<SceneTypes, Scene> scenes;
     private TextArea textArea_eventMessages;
+    
+    /**
+     * Utrile plus tard pour faire un clean plus propre de la scene précédente
+     * lors d'un switch
+     */
     private SceneTypes sceneType;
     
     public ScenesManager(Client controller, Stage stage) {
@@ -49,6 +54,8 @@ public class ScenesManager {
         this.stage = stage;
         
         scenes = new HashMap<>();
+        
+        buildScenes();
     }
     
     /**
@@ -59,7 +66,8 @@ public class ScenesManager {
      */
     public void switchScene(SceneTypes sceneType){
    
-        buildScenes();
+        if(sceneType == SceneTypes.EVENTS)
+            textArea_eventMessages.clear();
         
         stage.setTitle(sceneType.toString());
         stage.setScene(scenes.get(sceneType));
