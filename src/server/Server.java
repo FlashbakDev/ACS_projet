@@ -18,7 +18,6 @@ import rmi.ServerRemote;
 public class Server {
 
     private ServerRemote serverRemote;
-    private EventsManager eventsManager;
     
     public Server() {
         
@@ -38,13 +37,11 @@ public class Server {
         try {
 
             serverRemote = new ServerRemote();
-            eventsManager = new EventsManager(serverRemote, null);
             System.out.println("Object created.");
             
             Naming.rebind("serverRemote", serverRemote);
             System.out.println("Object saves.");
             
-            eventsManager.start();
             System.out.println("Server ready.");
 
         } catch (MalformedURLException | RemoteException e) {

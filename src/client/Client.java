@@ -16,9 +16,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import rmi.ClientRemote;
+import rmi.EventMessagesListener;
 import rmi.IServerRemote;
-import rmi.IMessageListener;
+import rmi.IEventMessagesListener;
 
 /**
  *
@@ -28,7 +28,7 @@ public class Client extends Application{
     
     private IServerRemote serverRemote; 
     private ScenesManager view;
-    private ClientRemote clientRemote;
+    private EventMessagesListener clientRemote;
     private List<String> eventMessages;
     private long id;
 
@@ -48,7 +48,7 @@ public class Client extends Application{
         try {
 
             serverRemote = (IServerRemote) Naming.lookup(url);
-            clientRemote = new ClientRemote(this);
+            clientRemote = new EventMessagesListener(this);
             id = serverRemote.connect(clientRemote);
 
             view.switchScene(ScenesManager.SceneTypes.EVENTS);

@@ -6,8 +6,21 @@
 package rmi;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.shape.Path;
 
 /**
  *
@@ -15,24 +28,35 @@ import java.util.logging.Logger;
  */
 public class EventsManager extends Thread {
 
-    private ServerRemote serverRemote;
-    private File eventFile;
+    private final ServerRemote serverRemote;
+    private List<String> lines;
     
-    public EventsManager(ServerRemote contract, File eventFile) {
-        
+    public EventsManager(ServerRemote contract, String fileName) {
+
         this.serverRemote = contract;
-        this.eventFile = eventFile;
+        lines = new ArrayList<>();
+        
+        try {
+            
+            lines = Files.readAllLines(Paths.get(fileName),  StandardCharsets.UTF_8);
+
+        } catch (IOException ex) {
+            
+            Logger.getLogger(EventsManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     public void run() {
         
-        while (true) {
+        ListIterator <String> itr = lines.listIterator (lines.size());
+        
+        while (itr.hasPrevious()) {
 
             try {
-
+                
+                serverRemote.notifyListeners(itr.previous());
                 sleep(1000);
-                serverRemote.notifyListeners();
 
             } catch (InterruptedException ex) {
 

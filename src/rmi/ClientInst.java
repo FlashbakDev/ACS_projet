@@ -14,9 +14,9 @@ public class ClientInst {
     private long id;
     private String ip;
     public boolean connected;
-    public IMessageListener listener;
+    public IEventMessagesListener listener;
 
-    public ClientInst(long id, String ip, IMessageListener listener) {
+    public ClientInst(long id, String ip, IEventMessagesListener listener) {
     
         this.id = id;
         this.ip = ip;

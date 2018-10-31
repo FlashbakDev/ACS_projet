@@ -12,7 +12,7 @@ import java.rmi.RemoteException;
  *
  * @author Benjamin
  */
-public interface IMessageListener extends Remote{
+public interface IEventMessagesListener extends Remote{
     
-    public void messageReceived(String message) throws RemoteException;
+    public void EventMessageReceived(String message) throws RemoteException;
 }

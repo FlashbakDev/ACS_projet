@@ -5,6 +5,7 @@
  */
 package rmi;
 
+import java.io.File;
 import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
@@ -19,14 +20,18 @@ import java.util.logging.Logger;
  */
 public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     
+    private EventsManager eventsManager;
     private final Map<Long, ClientInst> clients;
     private long ids;
     
     public ServerRemote() throws RemoteException {
         super();
         
+        eventsManager = new EventsManager(this, "Events/test.txt");
         clients = new HashMap<>();
         ids = 0;
+        
+        eventsManager.start();
     }
 
     @Override
@@ -46,7 +51,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     }
     
     @Override
-    public long connect(IMessageListener listener) throws RemoteException{
+    public long connect(IEventMessagesListener listener) throws RemoteException{
         
         try {
             
@@ -120,9 +125,9 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         return ids;
     }
     
-    public void notifyListeners() {
+    public void notifyListeners(String message) {
         
-        System.out.println( "ServerRemote.notifyListeners()");
+        System.out.println( "ServerRemote.notifyListeners() : "+ message);
         
         clients.entrySet().forEach((entry) -> {
             
@@ -130,7 +135,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
                 try {
 
-                    entry.getValue().listener.messageReceived("aaa");
+                    entry.getValue().listener.EventMessageReceived(message);
 
                 } catch(RemoteException ex) {
 

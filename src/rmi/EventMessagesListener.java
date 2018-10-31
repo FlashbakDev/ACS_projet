@@ -8,25 +8,22 @@ package rmi;
 import client.Client;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.List;
 
 /**
  *
  * @author Benjamin
  */
-public class ClientRemote extends UnicastRemoteObject implements IMessageListener{
+public class EventMessagesListener extends UnicastRemoteObject implements IEventMessagesListener{
 
-    private Client client;
+    private final Client client;
     
-    public ClientRemote(Client client) throws RemoteException
+    public EventMessagesListener(Client client) throws RemoteException
     {
         this.client = client;
     } 
     
     @Override
-    public void messageReceived(String message) throws RemoteException {
-        
-        System.out.println("rmi.ClientRemote.messageReceived() : "+ message);
+    public void EventMessageReceived(String message) throws RemoteException {
         
         client.onMessageReceived(message);
     }

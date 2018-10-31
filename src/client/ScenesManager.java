@@ -13,6 +13,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.ColumnConstraints;
@@ -38,9 +39,7 @@ public class ScenesManager {
     
     private Client controller;
     private Stage stage;
-    
     private final Map<SceneTypes, Scene> scenes;
-    
     private TextArea textArea_eventMessages;
     
     public ScenesManager(Client controller, Stage stage) {
@@ -52,6 +51,12 @@ public class ScenesManager {
         buildScenes();
     }
     
+    /**
+     * Switch between scenes, if @param is SceneTypes.CONNECTION then stage 
+     * resisibily is set to false.
+     * 
+     * @param scene scene to switch to
+     */
     public void switchScene(SceneTypes scene){
    
         stage.setTitle(scene.toString());
@@ -65,17 +70,37 @@ public class ScenesManager {
         stage.show();
     }
     
+    /**
+     * Build all scenes.
+     */
     private void buildScenes(){
         
         buildConnectionScene();
         buildEventScene();
     }
     
+    /**
+     * Append text to area and scroll to bottom only if vertical scrollbar was at bottom of the area.
+     * @param message message to append
+     */
     public void addMessage(String message){
-        
-        textArea_eventMessages.textProperty().setValue(textArea_eventMessages.textProperty().getValue() + message + "\n");
+
+        ScrollBar scrollBar = (ScrollBar) textArea_eventMessages.lookup(".scroll-bar:vertical"); 
+        if(scrollBar.valueProperty().get() == 1.0){
+            
+            textArea_eventMessages.appendText(message + "\n");
+        }
+        else{
+            
+            int caretPosition = textArea_eventMessages.caretPositionProperty().get();
+            textArea_eventMessages.appendText(message + "\n");
+            textArea_eventMessages.positionCaret(caretPosition);
+        }
     }
     
+    /**
+     * Build the Connectioin scene.
+     */
     private void buildConnectionScene(){
         
         // main layout
@@ -118,6 +143,9 @@ public class ScenesManager {
         scenes.put(SceneTypes.CONNECTION, new Scene(grid, 350, 150));
     }
     
+    /**
+     * Build the Event scene.
+     */
     private void buildEventScene(){
         
         // main layout
@@ -146,6 +174,7 @@ public class ScenesManager {
 
         textArea_eventMessages = new TextArea();
         textArea_eventMessages.setEditable(false);
+        textArea_eventMessages.setWrapText(true);
         grid.add(textArea_eventMessages, 0, 1);
         
         Button button_disconnect = new Button();
