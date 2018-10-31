@@ -29,13 +29,11 @@ public class Client extends Application{
     private IServerRemote serverRemote; 
     private ScenesManager view;
     private EventMessagesListener clientRemote;
-    private List<String> eventMessages;
     private long id;
 
     @Override
     public void start(Stage primaryStage) {
         
-        eventMessages = new ArrayList<>();
         id = 0;
         view = new ScenesManager(this, primaryStage);
         view.switchScene(ScenesManager.SceneTypes.CONNECTION);
@@ -76,7 +74,6 @@ public class Client extends Application{
     
     public void onMessageReceived(String message){
 
-        eventMessages.add(message);
         view.addMessage(message);
     }
     
@@ -85,7 +82,8 @@ public class Client extends Application{
     public void stop() throws Exception {
         super.stop(); //To change body of generated methods, choose Tools | Templates.
         
-        onClickOnButton_disconnect();
+        serverRemote.disconnect(id);
+        UnicastRemoteObject.unexportObject(clientRemote, true);
     }
     
     /**
