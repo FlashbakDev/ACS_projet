@@ -25,39 +25,39 @@ public class EventsManager extends Thread {
     private final ServerRemote serverRemote;
     private List<String> lines;
     private List<String> passedLines;
-    
+
     public EventsManager(ServerRemote contract, String fileName) {
 
         this.serverRemote = contract;
         lines = new ArrayList<>();
         passedLines = new ArrayList<>();
-        
+
         try {
-            
-            lines = Files.readAllLines(Paths.get(fileName),  StandardCharsets.UTF_8);
+
+            lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
 
         } catch (IOException ex) {
-            
+
             Logger.getLogger(EventsManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
     public void run() {
-        
-        ListIterator <String> itr = lines.listIterator (lines.size());
+
+        ListIterator<String> itr = lines.listIterator(lines.size());
         int time = 0;
-        
+
         while (itr.hasPrevious()) {
 
             try {
-                
+
                 int nextTime = Integer.parseInt(itr.previous().split(" ")[0]);
                 int waitTime = nextTime - time;
-                
+
                 //System.out.println("time = "+ time +", next time = "+ nextTime + ", waitTime = "+ waitTime +", "+ (long)((waitTime*60000)*timeSpeed));
-                sleep((long)((waitTime*1000)*timeSpeed));
-                
+                sleep((long) ((waitTime * 1000) * timeSpeed));
+
                 time += waitTime;
                 serverRemote.notifyListeners(itr.previous());
                 passedLines.add(itr.previous());
@@ -68,6 +68,8 @@ public class EventsManager extends Thread {
             }
         }
     }
-    
-    public List<String> getPassedLines(){return passedLines;}
+
+    public List<String> getPassedLines() {
+        return passedLines;
+    }
 }
