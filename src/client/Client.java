@@ -17,27 +17,28 @@ import javafx.stage.Stage;
 import rmi.EventMessagesListener;
 import rmi.IServerRemote;
 
+//Verifier pourquoi la croix marche pas sur l'affichage du texte
 /**
  *
  * @author Benjamin
  */
-public class Client extends Application{
-    
-    private IServerRemote serverRemote; 
+public class Client extends Application {
+
+    private IServerRemote serverRemote;
     private ScenesManager view;
     private EventMessagesListener clientRemote;
     private long id;
 
     @Override
     public void start(Stage primaryStage) {
-        
+
         id = 0;
         view = new ScenesManager(this, primaryStage);
         view.switchScene(ScenesManager.SceneTypes.CONNECTION);
     }
-    
-    public void onClickOnButton_connect(String ipAdress){
-        
+
+    public void onClickOnButton_connect(String ipAdress) {
+
         String url = "rmi://" + ipAdress + "/serverRemote";
 
         try {
@@ -47,56 +48,57 @@ public class Client extends Application{
             id = serverRemote.connect(clientRemote);
 
             view.switchScene(ScenesManager.SceneTypes.EVENTS);
-            
-        } catch(MalformedURLException| NotBoundException| RemoteException ex) {
-            
+
+        } catch (MalformedURLException | NotBoundException | RemoteException ex) {
+
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public void onClickOnButton_disconnect(){
-        
+
+    public void onClickOnButton_disconnect() {
+
         try {
-            
+
             serverRemote.disconnect(id);
             UnicastRemoteObject.unexportObject(clientRemote, true);
             id = 0;
-            
+
             view.switchScene(ScenesManager.SceneTypes.CONNECTION);
-            
+
         } catch (RemoteException ex) {
-            
+
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public void onMessageReceived(String message){
+
+    public void onMessageReceived(String message) {
 
         view.addMessage(message);
     }
-    
+
     /**
      * Include clean server disconnection.
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @Override
     public void stop() throws Exception {
         super.stop(); //To change body of generated methods, choose Tools | Templates.
-        
-        if(id > 0){
-            
+
+        if (id > 0) {
+
             serverRemote.disconnect(id);
             UnicastRemoteObject.unexportObject(clientRemote, true);
         }
     }
-    
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
+
         System.out.println("Client start");
-        
+
         launch(args);
     }
 }
