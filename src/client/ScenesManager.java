@@ -124,9 +124,11 @@ public class ScenesManager {
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(25, 25, 25, 25));
+        grid.setPadding(new Insets(25, 25, 50, 25));
 
-        // 3 rows
+        // 5 rows
+        grid.getRowConstraints().add(new RowConstraints());
+        grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
@@ -139,6 +141,8 @@ public class ScenesManager {
         Text text_title = new Text("Connexion");
         text_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(text_title, 0, 0, 2, 1);
+        
+      
 
         Label label_ipAdress = new Label("Adresse du serveur : ");
         grid.add(label_ipAdress, 0, 1);
@@ -146,14 +150,28 @@ public class ScenesManager {
         TextField textField_ipAdress = new TextField();
         textField_ipAdress.textProperty().setValue("127.0.0.1");
         grid.add(textField_ipAdress, 1, 1);
+        
+        Label label_pseudo = new Label("Pseudo : ");
+        grid.add(label_pseudo, 0, 2);
+
+        TextField textField_pseudo = new TextField();
+        textField_pseudo.textProperty().setValue(" ");
+        grid.add(textField_pseudo, 1, 2);
+        
+        Label label_mdp = new Label("Password : ");
+        grid.add(label_mdp, 0, 3);
+
+        TextField textField_mdp = new TextField();
+        textField_mdp.textProperty().setValue(" ");
+        grid.add(textField_mdp, 1, 3);
 
         Button button_connect = new Button();
         button_connect.setText("Connexion");
         button_connect.setOnAction((ActionEvent event) -> {
-            controller.onClickOnButton_connect(textField_ipAdress.textProperty().getValue());
+            controller.onClickOnButton_connect(textField_ipAdress.textProperty().getValue(), textField_pseudo.textProperty().getValue(), textField_mdp.textProperty().getValue());
         });
         button_connect.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        grid.add(button_connect, 0, 2, 2, 1);
+        grid.add(button_connect, 0, 4, 2, 1);
 
         // adds scene
         scenes.put(SceneTypes.CONNECTION, new Scene(grid, 350, 150));
