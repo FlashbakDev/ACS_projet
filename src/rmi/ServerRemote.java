@@ -51,7 +51,11 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     }
 
     @Override
-    public long connect(IEventMessagesListener listener) throws RemoteException {
+    /**Fonction qui s'execute à chaque connexion de client
+     * Verifie dans la table des clients si le client qui se connecte est nouveau
+     * ou ancien.
+     */
+    public long connect(IEventMessagesListener listener, String pseudo, int mdp) throws RemoteException {
 
         try {
 
@@ -82,7 +86,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
             }
 
             // add new
-            ClientInst client = new ClientInst(getNextId(), ip, listener);
+            ClientInst client = new ClientInst(getNextId(), ip, listener,pseudo,mdp);
             clients.put(client.getId(), client);
 
             System.out.println("[" + ip + "] connected");

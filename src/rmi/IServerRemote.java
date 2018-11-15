@@ -16,7 +16,7 @@ public interface IServerRemote extends Remote {
 
     String test() throws RemoteException;
     
-    long connect(IEventMessagesListener listener) throws RemoteException;
+    long connect(IEventMessagesListener listener, String pseudo, int mdp) throws RemoteException;
     
     boolean disconnect(long id) throws RemoteException;
 }

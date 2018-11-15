@@ -37,15 +37,20 @@ public class Client extends Application {
         view.switchScene(ScenesManager.SceneTypes.CONNECTION);
     }
 
-    public void onClickOnButton_connect(String ipAdress) {
+    /**Initialise la connexion rmi
+     Change la vue 
+     @param ipAdress : Adresse ip du serveur distant*/
+    public void onClickOnButton_connect(String ipAdress, String pseudo, String password) {
 
         String url = "rmi://" + ipAdress + "/serverRemote";
 
         try {
 
+            int  mdp = password.hashCode();
+            
             serverRemote = (IServerRemote) Naming.lookup(url);
             clientRemote = new EventMessagesListener(this);
-            id = serverRemote.connect(clientRemote);
+            id = serverRemote.connect(clientRemote,pseudo,mdp);
 
             view.switchScene(ScenesManager.SceneTypes.EVENTS);
 
@@ -55,6 +60,7 @@ public class Client extends Application {
         }
     }
 
+    /**Ferme la connexion */
     public void onClickOnButton_disconnect() {
 
         try {
