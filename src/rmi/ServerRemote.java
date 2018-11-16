@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package rmi;
 
 import java.rmi.RemoteException;
@@ -20,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
-    private EventsManager eventsManager;
+    private final EventsManager eventsManager;
     private final Map<Long, ClientInst> clients;
     private long ids;
 
@@ -50,12 +45,16 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         return "Hello world !";
     }
 
-    @Override
-    /**Fonction qui s'execute à chaque connexion de client
-     * Verifie dans la table des clients si le client qui se connecte est nouveau
-     * ou ancien.
+    /** Fonction qui s'execute à chaque connexion de client
+     * Verifie dans la table des clients si le client qui se connecte est
+     * nouveau ou ancien.
+     *
+     * @param listener
+     * @return
+     * @throws java.rmi.RemoteException
      */
-    public long connect(IEventMessagesListener listener, String pseudo, int mdp) throws RemoteException {
+    @Override
+    public long connect(IEventMessagesListener listener) throws RemoteException {
 
         try {
 
@@ -86,7 +85,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
             }
 
             // add new
-            ClientInst client = new ClientInst(getNextId(), ip, listener,pseudo,mdp);
+            ClientInst client = new ClientInst(getNextId(), ip, listener);
             clients.put(client.getId(), client);
 
             System.out.println("[" + ip + "] connected");
@@ -136,8 +135,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
     public void notifyListeners(String message) {
 
-        System.out.println("ServerRemote.notifyListeners() : " + message);
-
+        //System.out.println("ServerRemote.notifyListeners() : " + message);
         clients.entrySet().forEach((entry) -> {
 
             if (entry.getValue().connected) {

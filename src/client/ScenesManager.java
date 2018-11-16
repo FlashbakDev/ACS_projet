@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package client;
 
 import java.util.HashMap;
@@ -37,8 +32,8 @@ public class ScenesManager {
         EVENTS
     }
 
-    private Client controller;
-    private Stage stage;
+    private final Client controller;
+    private final Stage stage;
     private final Map<SceneTypes, Scene> scenes;
     private TextArea textArea_eventMessages;
 
@@ -130,8 +125,6 @@ public class ScenesManager {
         grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
-        grid.getRowConstraints().add(new RowConstraints());
-        grid.getRowConstraints().add(new RowConstraints());
 
         // 2 columns
         grid.getColumnConstraints().add(new ColumnConstraints());
@@ -141,8 +134,6 @@ public class ScenesManager {
         Text text_title = new Text("Connexion");
         text_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(text_title, 0, 0, 2, 1);
-        
-      
 
         Label label_ipAdress = new Label("Adresse du serveur : ");
         grid.add(label_ipAdress, 0, 1);
@@ -150,28 +141,14 @@ public class ScenesManager {
         TextField textField_ipAdress = new TextField();
         textField_ipAdress.textProperty().setValue("127.0.0.1");
         grid.add(textField_ipAdress, 1, 1);
-        
-        Label label_pseudo = new Label("Pseudo : ");
-        grid.add(label_pseudo, 0, 2);
-
-        TextField textField_pseudo = new TextField();
-        textField_pseudo.textProperty().setValue(" ");
-        grid.add(textField_pseudo, 1, 2);
-        
-        Label label_mdp = new Label("Password : ");
-        grid.add(label_mdp, 0, 3);
-
-        TextField textField_mdp = new TextField();
-        textField_mdp.textProperty().setValue(" ");
-        grid.add(textField_mdp, 1, 3);
 
         Button button_connect = new Button();
         button_connect.setText("Connexion");
         button_connect.setOnAction((ActionEvent event) -> {
-            controller.onClickOnButton_connect(textField_ipAdress.textProperty().getValue(), textField_pseudo.textProperty().getValue(), textField_mdp.textProperty().getValue());
+            controller.onClickOnButton_connect(textField_ipAdress.textProperty().getValue());
         });
         button_connect.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        grid.add(button_connect, 0, 4, 2, 1);
+        grid.add(button_connect, 0, 2, 2, 1);
 
         // adds scene
         scenes.put(SceneTypes.CONNECTION, new Scene(grid, 350, 150));
