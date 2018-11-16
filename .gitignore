@@ -40,3 +40,13 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Netbean
+# =========================
+
+**/nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
