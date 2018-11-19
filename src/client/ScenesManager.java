@@ -121,7 +121,7 @@ public class ScenesManager {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 50, 25));
 
-        // 5 rows
+        // 3 rows
         grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
