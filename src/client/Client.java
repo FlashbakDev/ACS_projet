@@ -8,12 +8,14 @@ import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import rmi.EventMessagesListener;
 import rmi.IServerRemote;
+import rmi.Joueur;
 
 //Verifier pourquoi la croix marche pas sur l'affichage du texte
 /**
@@ -135,5 +137,13 @@ public class Client extends Application {
         }
 
         return generatedPassword;
+    }
+    
+    /**
+     *
+     * @return La liste des joueurs
+     */
+    public List<Joueur> getListJoueurs() {
+       return serverRemote.getListJoueurs();
     }
 }

@@ -1,12 +1,16 @@
 package client;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextArea;
@@ -19,6 +23,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import rmi.Joueur;
 
 /**
  *
@@ -182,6 +187,7 @@ public class ScenesManager {
 
         // 1 columns
         grid.getColumnConstraints().add(new ColumnConstraints());
+        grid.getColumnConstraints().add(new ColumnConstraints());
 
         grid.getColumnConstraints().get(0).setHgrow(Priority.ALWAYS);
 
@@ -202,6 +208,12 @@ public class ScenesManager {
         });
         button_disconnect.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid.add(button_disconnect, 0, 2);
+        
+        //Normalement JavaFx peut convertir le Set correctement
+        ChoiceBox<Joueur> listJoueur = new ChoiceBox<>();
+       
+        listJoueur.setItems(FXCollections.observableList(controller.getListJoueurs() ));
+        grid.add(listJoueur, 1, 0);
 
         // add scene
         scenes.put(SceneTypes.EVENTS, new Scene(grid, 800, 600));

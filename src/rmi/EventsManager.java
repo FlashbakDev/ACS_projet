@@ -76,7 +76,7 @@ public class EventsManager extends Thread {
      * Fournit au serveur la liste des joueurs disponibles.
      * @since 1.1
      */
-    public Set<Joueur> generateListJoueur(){
+    public List<Joueur> generateListJoueur(){
         
          throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
      

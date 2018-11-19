@@ -3,11 +3,10 @@ package rmi;
 import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +22,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     private long ids;
     /**La liste des joueurs, 
      * @since 1.1 */
-    private Set<Joueur> liste_joueurs;
+    private List<Joueur> liste_joueurs;
 
     /**
      * @since 1.0
@@ -40,7 +39,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         try{
             this.liste_joueurs = eventsManager.generateListJoueur();
         }catch(Exception e){
-            this.liste_joueurs = new HashSet<Joueur>();
+            this.liste_joueurs = new ArrayList<Joueur>();
             liste_joueurs.add(new Joueur("machin"));
             liste_joueurs.add(new Joueur("zidane"));
         }
@@ -203,7 +202,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * @since 1.1
      */
     @Override
-    public Set<Joueur> getListJoueurs() {
+    public List<Joueur> getListJoueurs() {
        return this.liste_joueurs;
     }
 }

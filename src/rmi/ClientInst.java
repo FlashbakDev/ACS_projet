@@ -28,4 +28,5 @@ public class ClientInst {
     public long getId() {
         return id;
     }
+    
 }
