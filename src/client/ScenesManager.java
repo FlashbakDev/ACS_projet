@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 /**
  *
  * @author Benjamin
+ * @version 1.0
  */
 public class ScenesManager {
 
@@ -40,6 +41,7 @@ public class ScenesManager {
     /**
      * Utile plus tard pour faire un clean plus propre de la scene précédente
      * lors d'un switch
+     * @since 1.0
      */
     private SceneTypes sceneType;
 
@@ -59,6 +61,7 @@ public class ScenesManager {
      * resisibily is set to false.
      *
      * @param sceneType scene to switch to
+     * @since 1.0
      */
     public void switchScene(SceneTypes sceneType) {
 
@@ -82,6 +85,7 @@ public class ScenesManager {
 
     /**
      * Build all scenes.
+     * @since 1.0
      */
     private void buildScenes() {
 
@@ -94,6 +98,7 @@ public class ScenesManager {
      * at bottom of the area.
      *
      * @param message message to append
+     * @since 1.0
      */
     public void addMessage(String message) {
 
@@ -111,6 +116,7 @@ public class ScenesManager {
 
     /**
      * Build the Connectioin scene.
+     * @since 1.0
      */
     private void buildConnectionScene() {
 
@@ -156,6 +162,7 @@ public class ScenesManager {
 
     /**
      * Build the Event scene.
+     * @since 1.0
      */
     private void buildEventScene() {
 

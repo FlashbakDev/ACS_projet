@@ -16,7 +16,8 @@ public class ClientInst {
         this.id = id;
         this.ip = ip;
         this.listener = listener;
-
+    Joueur j = new Joueur("test");
+    j.equals(j);
         connected = true;
     }
 

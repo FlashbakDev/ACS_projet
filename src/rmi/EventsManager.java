@@ -7,12 +7,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  *
  * @author Benjamin
+ * @version 1.1
  */
 public class EventsManager extends Thread {
 
@@ -21,6 +23,9 @@ public class EventsManager extends Thread {
     private List<String> lines;
     private List<String> passedLines;
 
+    /**
+     * @since 1.0
+     */
     public EventsManager(ServerRemote contract, String fileName) {
 
         this.serverRemote = contract;
@@ -37,6 +42,9 @@ public class EventsManager extends Thread {
         }
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
     public void run() {
 
@@ -63,7 +71,20 @@ public class EventsManager extends Thread {
             }
         }
     }
+    
+    /**
+     * Fournit au serveur la liste des joueurs disponibles.
+     * @since 1.1
+     */
+    public Set<Joueur> generateListJoueur(){
+        
+         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+     
+    }
 
+    /**
+     * @since 1.0
+     */
     public List<String> getPassedLines() {
         return passedLines;
     }

@@ -2,6 +2,7 @@ package rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Set;
 
 /**
  *
@@ -14,4 +15,6 @@ public interface IServerRemote extends Remote {
     long connect(IEventMessagesListener listener) throws RemoteException;
 
     boolean disconnect(long id) throws RemoteException;
+    
+    Set<Joueur> getListJoueurs();
 }

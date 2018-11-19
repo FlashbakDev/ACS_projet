@@ -4,31 +4,56 @@ import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  *
  * @author Benjamin
+ * @version 1.1
  */
 public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
     private final EventsManager eventsManager;
     private final Map<Long, ClientInst> clients;
     private long ids;
+    /**La liste des joueurs, 
+     * @since 1.1 */
+    private Set<Joueur> liste_joueurs;
 
+    /**
+     * @since 1.0
+     * @throws RemoteException
+     */
     public ServerRemote() throws RemoteException {
         super();
 
         eventsManager = new EventsManager(this, "Events/test.txt");
         clients = new HashMap<>();
         ids = 0;
+        
+        //Solution temporaire de test.
+        try{
+            this.liste_joueurs = eventsManager.generateListJoueur();
+        }catch(Exception e){
+            this.liste_joueurs = new HashSet<Joueur>();
+            liste_joueurs.add(new Joueur("machin"));
+            liste_joueurs.add(new Joueur("zidane"));
+        }
+        
 
         eventsManager.start();
     }
 
+    
+    /**
+     * @since 0.1
+     * @throws RemoteException
+     */
     @Override
     public String test() throws RemoteException {
 
@@ -52,6 +77,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * @param listener
      * @return
      * @throws java.rmi.RemoteException
+     * @since 1.0
      */
     @Override
     public long connect(IEventMessagesListener listener) throws RemoteException {
@@ -100,6 +126,14 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         return -1;
     }
 
+    /**
+     * Fonction qui deconnecte un client
+     * @param id : L'id du client à deconnecté
+     * @return indication de deconnexion du client
+     * @throws RemoteException
+     * @since 1.0
+     * 
+     */
     @Override
     public boolean disconnect(long id) throws RemoteException {
 
@@ -127,12 +161,20 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     }
 
     //peut etre synchronized ?
+    
+    /**
+     * @since 1.0
+     */
     private long getNextId() {
 
         ids++;
         return ids;
     }
 
+    
+    /**
+     * @since 1.0
+     */
     public void notifyListeners(String message) {
 
         //System.out.println("ServerRemote.notifyListeners() : " + message);
@@ -154,5 +196,14 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
                 }
             }
         });
+    }
+    
+    
+    /**@return la List de joueurs unique sur le serveur
+     * @since 1.1
+     */
+    @Override
+    public Set<Joueur> getListJoueurs() {
+       return this.liste_joueurs;
     }
 }
