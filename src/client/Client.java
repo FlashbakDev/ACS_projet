@@ -138,12 +138,13 @@ public class Client extends Application {
 
         return generatedPassword;
     }
-    
+
     /**
      *
      * @return La liste des joueurs
      */
     public List<Joueur> getListJoueurs() {
-       return serverRemote.getListJoueurs();
+
+        return serverRemote.getListJoueurs();
     }
 }

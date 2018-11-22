@@ -1,9 +1,7 @@
 package client;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -42,10 +40,12 @@ public class ScenesManager {
     private final Stage stage;
     private final Map<SceneTypes, Scene> scenes;
     private TextArea textArea_eventMessages;
+    private ChoiceBox<Joueur> choiceBox_joueurs;
 
     /**
      * Utile plus tard pour faire un clean plus propre de la scene précédente
      * lors d'un switch
+     *
      * @since 1.0
      */
     private SceneTypes sceneType;
@@ -72,7 +72,9 @@ public class ScenesManager {
 
         //Eventuellement faire un rebuild de la scene
         if (sceneType == SceneTypes.EVENTS) {
+
             textArea_eventMessages.clear();
+            choiceBox_joueurs.setItems(FXCollections.observableList(controller.getListJoueurs()));
         }
 
         stage.setTitle(sceneType.toString());
@@ -90,6 +92,7 @@ public class ScenesManager {
 
     /**
      * Build all scenes.
+     *
      * @since 1.0
      */
     private void buildScenes() {
@@ -121,6 +124,7 @@ public class ScenesManager {
 
     /**
      * Build the Connectioin scene.
+     *
      * @since 1.0
      */
     private void buildConnectionScene() {
@@ -167,6 +171,7 @@ public class ScenesManager {
 
     /**
      * Build the Event scene.
+     *
      * @since 1.0
      */
     private void buildEventScene() {
@@ -190,6 +195,7 @@ public class ScenesManager {
         grid.getColumnConstraints().add(new ColumnConstraints());
 
         grid.getColumnConstraints().get(0).setHgrow(Priority.ALWAYS);
+        grid.getColumnConstraints().get(1).setHgrow(Priority.ALWAYS);
 
         // Content
         Text text_title = new Text("Suivie d'évènement");
@@ -208,12 +214,9 @@ public class ScenesManager {
         });
         button_disconnect.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid.add(button_disconnect, 0, 2);
-        
-        //Normalement JavaFx peut convertir le Set correctement
-        ChoiceBox<Joueur> listJoueur = new ChoiceBox<>();
-       
-        listJoueur.setItems(FXCollections.observableList(controller.getListJoueurs() ));
-        grid.add(listJoueur, 1, 0);
+
+        choiceBox_joueurs = new ChoiceBox<>();
+        grid.add(choiceBox_joueurs, 1, 0);
 
         // add scene
         scenes.put(SceneTypes.EVENTS, new Scene(grid, 800, 600));

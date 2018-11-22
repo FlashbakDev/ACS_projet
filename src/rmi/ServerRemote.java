@@ -20,7 +20,8 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     private final EventsManager eventsManager;
     private final Map<Long, ClientInst> clients;
     private long ids;
-    /**La liste des joueurs, 
+    /** La liste des joueurs,
+     *
      * @since 1.1 */
     private List<Joueur> liste_joueurs;
 
@@ -34,21 +35,19 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         eventsManager = new EventsManager(this, "Events/test.txt");
         clients = new HashMap<>();
         ids = 0;
-        
+
         //Solution temporaire de test.
-        try{
+        try {
             this.liste_joueurs = eventsManager.generateListJoueur();
-        }catch(Exception e){
+        } catch (Exception e) {
             this.liste_joueurs = new ArrayList<Joueur>();
             liste_joueurs.add(new Joueur("machin"));
             liste_joueurs.add(new Joueur("zidane"));
         }
-        
 
         eventsManager.start();
     }
 
-    
     /**
      * @since 0.1
      * @throws RemoteException
@@ -127,11 +126,12 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
     /**
      * Fonction qui deconnecte un client
+     *
      * @param id : L'id du client à deconnecté
      * @return indication de deconnexion du client
      * @throws RemoteException
      * @since 1.0
-     * 
+     *
      */
     @Override
     public boolean disconnect(long id) throws RemoteException {
@@ -160,7 +160,6 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     }
 
     //peut etre synchronized ?
-    
     /**
      * @since 1.0
      */
@@ -170,7 +169,6 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         return ids;
     }
 
-    
     /**
      * @since 1.0
      */
@@ -196,13 +194,14 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
             }
         });
     }
-    
-    
-    /**@return la List de joueurs unique sur le serveur
+
+    /**
+     * @return la List de joueurs unique sur le serveur
      * @since 1.1
      */
     @Override
     public List<Joueur> getListJoueurs() {
-       return this.liste_joueurs;
+
+        return this.liste_joueurs;
     }
 }

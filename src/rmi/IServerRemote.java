@@ -10,11 +10,11 @@ import java.util.List;
  */
 public interface IServerRemote extends Remote {
 
-    String test() throws RemoteException;
+    public String test() throws RemoteException;
 
-    long connect(IEventMessagesListener listener) throws RemoteException;
+    public long connect(IEventMessagesListener listener) throws RemoteException;
 
-    boolean disconnect(long id) throws RemoteException;
-    
-    List<Joueur> getListJoueurs();
+    public boolean disconnect(long id) throws RemoteException;
+
+    public List<Joueur> getListJoueurs();
 }
