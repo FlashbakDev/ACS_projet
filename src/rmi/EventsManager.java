@@ -6,9 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +27,7 @@ public class EventsManager extends Thread {
     private List<String> passedLines;
     private Map<Player, Integer> playersVotes;
     boolean match_en_cour = false;
+    private Set<String> pari_equipe;
     /**
      * @param contract
      * @param fileName
@@ -36,8 +39,9 @@ public class EventsManager extends Thread {
         lines = new ArrayList<>();
         passedLines = new ArrayList<>();
 
-        this.playersVotes = new HashMap<>();
-        
+        this.playersVotes = new HashMap<Player,Integer>();
+        this.pari_equipe = new HashSet<String>();
+        this.initPariPossible();
         try {
 
             lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
@@ -72,7 +76,9 @@ public class EventsManager extends Thread {
                 
                 int nextTime = Integer.parseInt(ligne.split(" ")[0]);
                 int waitTime = nextTime - time;
-
+                
+                ligne = ligne.substring(ligne.split(" ")[0].length()+1);
+                ligne = "["+nextTime+":00]" + ligne;
                 //System.out.println("time = "+ time +", next time = "+ nextTime + ", waitTime = "+ waitTime +", "+ (long)((waitTime*60000)*timeSpeed));
                 sleep((long) ((waitTime * 1000) * timeSpeed));
 
@@ -90,13 +96,16 @@ public class EventsManager extends Thread {
         }
         this.match_en_cour = false;
         Map.Entry<Player,Integer> meilleurs_joueur = this.getName_joueur_voté();
-        ligne = "Le joueur ayant obtenu le plus de vote est : " + meilleurs_joueur + "("+ meilleurs_joueur.getValue() +")";
+        ligne = "Le joueur ayant obtenu le plus de vote est : " + meilleurs_joueur ;
         serverRemote.notifyListeners(ligne);
         passedLines.add(ligne);
+        
+       
         
     }
     
     /**
+     * @param s : String contenant ':' suivit d'une liste de nom séparé par des ','
      * @since 1.1
      */
     public void initListJoueur(String s){
@@ -107,6 +116,15 @@ public class EventsManager extends Thread {
             playersVotes.put(new Player(names_joueur), 0);
         }
         
+    }
+    
+     /**
+     * @since 1.1
+     */
+    public void initPariPossible(){
+        pari_equipe.add("victoire equipe 1");
+        pari_equipe.add("victoire equipe 2");
+        pari_equipe.add("égalité");
     }
     
     /**
@@ -128,6 +146,7 @@ public class EventsManager extends Thread {
         
         
     }
+    
 
     /**
      * @since 1.0
@@ -164,5 +183,11 @@ public class EventsManager extends Thread {
         return false;
     }
     
+    
+     
+    
     public Map<Player, Integer> getPlayersVotes(){return this.playersVotes;}
+    public Set<String> getPari(){return this.pari_equipe;}
+    
+    public boolean getFinMatch(){return this.match_en_cour;};
 }

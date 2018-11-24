@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -43,6 +44,7 @@ public class ScenesManager {
     private final Map<SceneTypes, Scene> scenes;
     private TextArea textArea_eventMessages;
     private ChoiceBox<Player> choiceBox_joueurs;
+    private ChoiceBox<String> choiceBox_pari;
 
     /**
      * Utile plus tard pour faire un clean plus propre de la scene précédente
@@ -80,6 +82,11 @@ public class ScenesManager {
             Map<Player, Integer> players = controller.getPlayersList();
             if(players != null && players.size() > 0)
                 choiceBox_joueurs.setItems(FXCollections.observableList(new ArrayList<>(players.keySet())));
+            
+            Set<String> pari = controller.getPariList();
+            if(pari != null && pari.size() > 0)
+                choiceBox_pari.setItems(FXCollections.observableList(new ArrayList<>(pari)));
+            else System.err.println("osdjfpodsjf");
         }
 
         stage.setTitle(sceneType.toString());
@@ -253,6 +260,20 @@ public class ScenesManager {
         });
         button_vote.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(button_vote, 1, 1);
+        
+        // grid_right content
+        choiceBox_pari = new ChoiceBox<>();
+        choiceBox_pari.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid_right.add(choiceBox_pari, 0, 2);
+        
+        Button button_pari = new Button();
+        button_pari.setText("Parier");
+        button_pari.setOnAction((ActionEvent event) -> {
+            
+            controller.onClickOnButton_pari(choiceBox_pari.getValue());
+        });
+        button_pari.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid_right.add(button_pari, 1, 2);
 
         // add scene
         scenes.put(SceneTypes.EVENTS, new Scene(grid, 800, 600));

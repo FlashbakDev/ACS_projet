@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -193,6 +194,17 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         return eventsManager.getPlayersVotes();
     }
     
+    
+      /**
+     * @return la List de joueurs unique sur le serveur
+     * @throws java.rmi.RemoteException
+     * @since 1.1
+     */
+    @Override
+   public Set<String> getPariList() throws RemoteException{
+
+        return eventsManager.getPari();
+    }
     /**
      *
      * @param id : L'identifiant du client.
@@ -213,6 +225,27 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         }
         
         System.out.println( "["+id+"] invalid vote : "+ j.toString());
+        return false;
+    }
+    
+     /**
+     *
+     * @param id : L'identifiant du client.
+     * @param j : nom du vote
+     * @return : indicateur de validité du vote.
+     * @throws RemoteException
+     */
+    @Override
+    public boolean pari(long id, String j) throws RemoteException{
+        
+        if(!this.eventsManager.getFinMatch()){
+            this.clients.get(id).pari = j;
+            
+            System.out.println( "["+id+"] paried for "+ j.toString());
+            return true;
+        }
+        
+        System.out.println( "["+id+"] invalid pari : "+ j.toString());
         return false;
     }
 }

@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -95,6 +96,18 @@ public class Client extends Application {
         }
     }
 
+     /** Valide le pari */
+    public void onClickOnButton_pari(String j) {
+
+        try {
+
+            serverRemote.pari(id, j);
+
+        } catch (RemoteException ex) {
+
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     /**
      * Include clean server disconnection.
      *
@@ -163,6 +176,24 @@ public class Client extends Application {
         try {
             
             return serverRemote.getPlayersList();
+            
+        } catch (RemoteException ex) {
+            
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return null;
+    }
+    
+      /**
+     *
+     * @return La liste des joueurs
+     */
+    public Set<String> getPariList() {
+
+        try {
+            
+            return serverRemote.getPariList();
             
         } catch (RemoteException ex) {
             

@@ -11,6 +11,7 @@ public class ClientInst {
     public boolean connected;
     public IEventMessagesListener listener;
     public Player vote; 
+    public String pari;
 
     public ClientInst(long id, String ip, IEventMessagesListener listener) {
 
