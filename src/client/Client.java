@@ -119,6 +119,7 @@ public class Client extends Application {
         System.out.println("Client start");
 
         launch(args);
+      
     }
 
     /**

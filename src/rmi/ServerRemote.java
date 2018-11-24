@@ -195,9 +195,9 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     
     /**
      *
-     * @param id
-     * @param j
-     * @return
+     * @param id : L'identifiant du client.
+     * @param j : L'identifiant du joueur
+     * @return : indicateur de validité du vote.
      * @throws RemoteException
      */
     @Override

@@ -1,5 +1,6 @@
-﻿80+1 Toulon s'impose largement face Ã  Agen (33-3) et empoche son premier bonus offensif de la saison. Malgré un score fleuve, c'est une faible équipe du RCT qui remporte un duel gâché par les fautes de main.
-80+1 Finalement, Lamoulie sort la balle des limites du terrain pour mettre un terme à cette rencontre.
+﻿81 Fin du match
+80 Toulon s'impose largement face Ã  Agen (33-3) et empoche son premier bonus offensif de la saison. Malgré un score fleuve, c'est une faible équipe du RCT qui remporte un duel gâché par les fautes de main.
+80 Finalement, Lamoulie sort la balle des limites du terrain pour mettre un terme à cette rencontre.
 80 Potgieter est sanctionné pour une position de hors-jeu : les Agenais jouent rapidement puisque la sirène a déjà retentit et tentent le tout pour le tout.
 80 Le lancer est bien capté et Potgieter est trouvé alors que la sirène retentit !
 79 Les Toulonnais relancent une nouvelle fois : Berdeu plaque Nakosi avant de récupérer le ballon pour le jeter dans les tribunes de colère... Il écope d'une pénalité et offre une dernière munition au RCT qui trouve une penaltouche.
@@ -36,7 +37,7 @@
 41 Remplacement de Bosch par Bethune.
 41 Remplacement de Fonua par Tanga.
 41 Le coup d'envoi de la seconde période est donné par Léo Berdeu pour le SUA.
-40+1 Toulon mène largement à la pause face à Agen (19-0). Dans une rencontre où les deux équipes peinent à trouver des solutions au milieu de fautes de main, c'est bien les hommes de Collazo qui ont pris les devants.
+40 Toulon mène largement à la pause face à Agen (19-0). Dans une rencontre où les deux équipes peinent à trouver des solutions au milieu de fautes de main, c'est bien les hommes de Collazo qui ont pris les devants.
 40 Et cette fois-ci, c'est le pack toulonnais qui est sanctionné ! Bras cassé pour les Agenais qui optent pour la mêlée.
 39 Le ballon est conservé par la mêlée toulonnaise : les trois-quarts Français font le travail. Après une superbe double sautée de Belleau pour Fekitoa, Bonneval ne parvient par à servir Trinh-Duc et commet un en-avant. Les imprécisions sont nombreuses.
 38 Le ballon est capté par l'alignement du SUA, mais les Toulonnais sont solides en défense et récupèrent une nouvelle mêlée ! Les fautes agenaises commencent à leur coûter cher, à deux minutes de la fin de cette première période.
@@ -99,3 +100,4 @@
 0 Mais le RCT de cette saison a du mal à démarrer : seulement une victoire au compteur, en quatre journées. Et une petite victoire (28-27 face à Castres).
 0 Toulon reçoit et part légèrement favori puisque les Varois ont remporté quatre des cinq dernières confrontations entre les deux formations.
 0 Bonsoir à tous et bienvenue pour suivre en direct cette rencontre entre Toulon et Agen comptant pour la 5ème journée de Top 14. Le coup d'envoi est à suivre à partir de 18h au stade Félix Mayol.
+0 Les Joueurs :Mateo,Jonathan,Romain,Mauricio,Bethune,Anthony

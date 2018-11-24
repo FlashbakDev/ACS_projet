@@ -9,23 +9,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  *
  * @author Benjamin
- * @version 1.1
+ * @version 1.2
  */
 public class EventsManager extends Thread {
 
-    private static final float timeSpeed = 1f; // 1 min = 1 seconde
+    private static final float timeSpeed = 0.5f; // 1 min = 1 seconde
     private final ServerRemote serverRemote;
     private List<String> lines;
     private List<String> passedLines;
     private Map<Player, Integer> playersVotes;
-    
+    boolean match_en_cour = false;
     /**
      * @param contract
      * @param fileName
@@ -37,7 +36,7 @@ public class EventsManager extends Thread {
         lines = new ArrayList<>();
         passedLines = new ArrayList<>();
 
-        initListJoueur();
+        this.playersVotes = new HashMap<>();
         
         try {
 
@@ -57,37 +56,77 @@ public class EventsManager extends Thread {
 
         ListIterator<String> itr = lines.listIterator(lines.size());
         int time = 0;
-
+        //int heurededepart =
+        String ligne = itr.previous();
+        initListJoueur(ligne); //La premiere ligne est envoyé à l'initialisateur de joueurs
+        this.match_en_cour = true;
         while (itr.hasPrevious()) {
 
             try {
-
-                int nextTime = Integer.parseInt(itr.previous().split(" ")[0]);
+                ligne = itr.previous();
+                
+                //Supprime un eventuelle premier caractere d'UTF. Necessaire pour la premiere ligne du fichier.
+                if ( Character.isIdentifierIgnorable(ligne.charAt(0)) ) {
+                    ligne = ligne.substring(1);
+                }
+                
+                int nextTime = Integer.parseInt(ligne.split(" ")[0]);
                 int waitTime = nextTime - time;
 
                 //System.out.println("time = "+ time +", next time = "+ nextTime + ", waitTime = "+ waitTime +", "+ (long)((waitTime*60000)*timeSpeed));
                 sleep((long) ((waitTime * 1000) * timeSpeed));
 
                 time += waitTime;
-                serverRemote.notifyListeners(itr.previous());
-                passedLines.add(itr.previous());
+                serverRemote.notifyListeners(ligne);
+                passedLines.add(ligne);
 
             } catch (InterruptedException ex) {
 
                 Logger.getLogger(EventsManager.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NumberFormatException ex){
+                Logger.getLogger(EventsManager.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
         }
+        this.match_en_cour = false;
+        Map.Entry<Player,Integer> meilleurs_joueur = this.getName_joueur_voté();
+        ligne = "Le joueur ayant obtenu le plus de vote est : " + meilleurs_joueur + "("+ meilleurs_joueur.getValue() +")";
+        serverRemote.notifyListeners(ligne);
+        passedLines.add(ligne);
+        
     }
     
     /**
      * @since 1.1
      */
-    public void initListJoueur(){
+    public void initListJoueur(String s){
         
-        this.playersVotes = new HashMap<>();
+        String[] names_joueurs = s.split(":")[1].split(","); //Les noms des joueurs commencent au : et sont separé par une virgule.
         
-        playersVotes.put(new Player("Michel"), 0);
-        playersVotes.put(new Player("Jean"), 0);
+        for (String names_joueur : names_joueurs) {
+            playersVotes.put(new Player(names_joueur), 0);
+        }
+        
+    }
+    
+    /**
+     * @since 1.2
+     */
+    private Map.Entry<Player,Integer> getName_joueur_voté(){
+        
+        Map.Entry<Player,Integer> maxEntry = null;
+        
+        for (Map.Entry<Player, Integer> entry : playersVotes.entrySet())
+        {
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
+            {
+                maxEntry = entry;
+            }
+        }
+       
+        return maxEntry;
+        
+        
     }
 
     /**
@@ -99,7 +138,7 @@ public class EventsManager extends Thread {
     
     public boolean vote(Player j){
         
-        if(j != null){
+        if(j != null && this.match_en_cour){
         
             if(this.playersVotes.containsKey(j)){
 
@@ -113,7 +152,7 @@ public class EventsManager extends Thread {
     
     public boolean unvote(Player j){
         
-        if(j != null){
+        if(j != null && this.match_en_cour){
         
             if(this.playersVotes.containsKey(j)){
 
