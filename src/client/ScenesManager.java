@@ -1,6 +1,8 @@
 package client;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -21,7 +23,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import rmi.Joueur;
+import rmi.Player;
 
 /**
  *
@@ -40,7 +42,7 @@ public class ScenesManager {
     private final Stage stage;
     private final Map<SceneTypes, Scene> scenes;
     private TextArea textArea_eventMessages;
-    private ChoiceBox<Joueur> choiceBox_joueurs;
+    private ChoiceBox<Player> choiceBox_joueurs;
 
     /**
      * Utile plus tard pour faire un clean plus propre de la scene précédente
@@ -74,7 +76,10 @@ public class ScenesManager {
         if (sceneType == SceneTypes.EVENTS) {
 
             textArea_eventMessages.clear();
-            choiceBox_joueurs.setItems(FXCollections.observableList(controller.getListJoueurs()));
+            
+            Map<Player, Integer> players = controller.getPlayersList();
+            if(players != null && players.size() > 0)
+                choiceBox_joueurs.setItems(FXCollections.observableList(new ArrayList<>(players.keySet())));
         }
 
         stage.setTitle(sceneType.toString());
@@ -190,14 +195,14 @@ public class ScenesManager {
 
         grid.getRowConstraints().get(1).setVgrow(Priority.ALWAYS);
 
-        // 1 columns
+        // 2 columns
         grid.getColumnConstraints().add(new ColumnConstraints());
         grid.getColumnConstraints().add(new ColumnConstraints());
 
         grid.getColumnConstraints().get(0).setHgrow(Priority.ALWAYS);
         grid.getColumnConstraints().get(1).setHgrow(Priority.ALWAYS);
-
-        // Content
+        
+        // grid Content
         Text text_title = new Text("Suivie d'évènement");
         text_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(text_title, 0, 0);
@@ -215,8 +220,39 @@ public class ScenesManager {
         button_disconnect.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid.add(button_disconnect, 0, 2);
 
+        GridPane grid_right = new GridPane();
+        grid_right.setAlignment(Pos.CENTER);
+        grid_right.setHgap(10);
+        grid_right.setVgap(10);
+        grid_right.setPadding(new Insets(25, 25, 25, 25));
+        grid_right.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid.add(grid_right, 1, 0, 3, 1);
+        
+        // 2 collumns
+        grid_right.getColumnConstraints().add(new ColumnConstraints());
+        grid_right.getColumnConstraints().add(new ColumnConstraints());
+
+        grid_right.getColumnConstraints().get(0).setHgrow(Priority.ALWAYS);
+        grid_right.getColumnConstraints().get(1).setHgrow(Priority.ALWAYS);
+        
+        // 3 rows
+        grid_right.getRowConstraints().add(new RowConstraints());
+        grid_right.getRowConstraints().add(new RowConstraints());
+        grid_right.getRowConstraints().add(new RowConstraints());
+        
+        // grid_right content
         choiceBox_joueurs = new ChoiceBox<>();
-        grid.add(choiceBox_joueurs, 1, 0);
+        choiceBox_joueurs.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid_right.add(choiceBox_joueurs, 0, 1);
+        
+        Button button_vote = new Button();
+        button_vote.setText("Voter");
+        button_vote.setOnAction((ActionEvent event) -> {
+            
+            controller.onClickOnButton_vote(choiceBox_joueurs.getValue());
+        });
+        button_vote.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid_right.add(button_vote, 1, 1);
 
         // add scene
         scenes.put(SceneTypes.EVENTS, new Scene(grid, 800, 600));

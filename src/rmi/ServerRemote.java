@@ -20,10 +20,6 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     private final EventsManager eventsManager;
     private final Map<Long, ClientInst> clients;
     private long ids;
-    /** La liste des joueurs,
-     *
-     * @since 1.1 */
-    private List<Joueur> liste_joueurs;
 
     /**
      * @since 1.0
@@ -35,15 +31,6 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         eventsManager = new EventsManager(this, "Events/test.txt");
         clients = new HashMap<>();
         ids = 0;
-
-        //Solution temporaire de test.
-        try {
-            this.liste_joueurs = eventsManager.generateListJoueur();
-        } catch (Exception e) {
-            this.liste_joueurs = new ArrayList<Joueur>();
-            liste_joueurs.add(new Joueur("machin"));
-            liste_joueurs.add(new Joueur("zidane"));
-        }
 
         eventsManager.start();
     }
@@ -197,11 +184,35 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
     /**
      * @return la List de joueurs unique sur le serveur
+     * @throws java.rmi.RemoteException
      * @since 1.1
      */
     @Override
-    public List<Joueur> getListJoueurs() {
+    public Map<Player, Integer> getPlayersList() throws RemoteException{
 
-        return this.liste_joueurs;
+        return eventsManager.getPlayersVotes();
+    }
+    
+    /**
+     *
+     * @param id
+     * @param j
+     * @return
+     * @throws RemoteException
+     */
+    @Override
+    public boolean vote(long id, Player j) throws RemoteException{
+        
+        if(this.eventsManager.vote(j)){
+            
+            this.eventsManager.unvote(this.clients.get(id).vote);
+            this.clients.get(id).vote = j;
+            
+            System.out.println( "["+id+"] voted for "+ j.toString());
+            return true;
+        }
+        
+        System.out.println( "["+id+"] invalid vote : "+ j.toString());
+        return false;
     }
 }

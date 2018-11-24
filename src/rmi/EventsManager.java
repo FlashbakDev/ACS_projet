@@ -5,8 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,8 +24,11 @@ public class EventsManager extends Thread {
     private final ServerRemote serverRemote;
     private List<String> lines;
     private List<String> passedLines;
-
+    private Map<Player, Integer> playersVotes;
+    
     /**
+     * @param contract
+     * @param fileName
      * @since 1.0
      */
     public EventsManager(ServerRemote contract, String fileName) {
@@ -32,6 +37,8 @@ public class EventsManager extends Thread {
         lines = new ArrayList<>();
         passedLines = new ArrayList<>();
 
+        initListJoueur();
+        
         try {
 
             lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
@@ -73,13 +80,14 @@ public class EventsManager extends Thread {
     }
     
     /**
-     * Fournit au serveur la liste des joueurs disponibles.
      * @since 1.1
      */
-    public List<Joueur> generateListJoueur(){
+    public void initListJoueur(){
         
-         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-     
+        this.playersVotes = new HashMap<>();
+        
+        playersVotes.put(new Player("Michel"), 0);
+        playersVotes.put(new Player("Jean"), 0);
     }
 
     /**
@@ -88,4 +96,34 @@ public class EventsManager extends Thread {
     public List<String> getPassedLines() {
         return passedLines;
     }
+    
+    public boolean vote(Player j){
+        
+        if(j != null){
+        
+            if(this.playersVotes.containsKey(j)){
+
+                this.playersVotes.replace(j, this.playersVotes.get(j), this.playersVotes.get(j)+1);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public boolean unvote(Player j){
+        
+        if(j != null){
+        
+            if(this.playersVotes.containsKey(j)){
+
+                this.playersVotes.replace(j, this.playersVotes.get(j), this.playersVotes.get(j)-1);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public Map<Player, Integer> getPlayersVotes(){return this.playersVotes;}
 }

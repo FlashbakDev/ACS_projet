@@ -10,23 +10,23 @@ public class ClientInst {
     private final String ip;
     public boolean connected;
     public IEventMessagesListener listener;
+    public Player vote; 
 
     public ClientInst(long id, String ip, IEventMessagesListener listener) {
 
         this.id = id;
         this.ip = ip;
         this.listener = listener;
-    Joueur j = new Joueur("test");
-    j.equals(j);
         connected = true;
     }
 
     public String getIp() {
+        
         return ip;
     }
 
     public long getId() {
+        
         return id;
     }
-    
 }

@@ -9,13 +9,14 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import rmi.EventMessagesListener;
 import rmi.IServerRemote;
-import rmi.Joueur;
+import rmi.Player;
 
 //Verifier pourquoi la croix marche pas sur l'affichage du texte
 /**
@@ -80,6 +81,19 @@ public class Client extends Application {
 
         view.addMessage(message);
     }
+    
+    /** Valide le vote */
+    public void onClickOnButton_vote(Player j) {
+
+        try {
+
+            serverRemote.vote(id, j);
+
+        } catch (RemoteException ex) {
+
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     /**
      * Include clean server disconnection.
@@ -143,8 +157,17 @@ public class Client extends Application {
      *
      * @return La liste des joueurs
      */
-    public List<Joueur> getListJoueurs() {
+    public Map<Player, Integer> getPlayersList() {
 
-        return serverRemote.getListJoueurs();
+        try {
+            
+            return serverRemote.getPlayersList();
+            
+        } catch (RemoteException ex) {
+            
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return null;
     }
 }

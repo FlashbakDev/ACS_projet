@@ -5,13 +5,15 @@
  */
 package rmi;
 
+import java.io.Serializable;
+
 /**
  *
  * @author jerem
  * Identifie un joueur
  * @version 1.0
  */
-public class Joueur {
+public class Player implements Serializable{
     /**Le nom du joueur, sert egalement à l'indentifier
      * @since 1.0     
      */
@@ -21,7 +23,7 @@ public class Joueur {
      * @param nom : Le nom du joueur
      * @since 1.0
      */
-    public Joueur(String nom){
+    public Player(String nom){
         this.nom = nom;
     }
     
@@ -43,13 +45,17 @@ public class Joueur {
      * @since 1.0
      */
     public boolean equals(Object obj) {
-      Joueur other=(Joueur) obj;
-      return this.nom.equals(other.nom);
+        
+        if(!(obj instanceof Player))
+            return false;
+        
+        return this.nom.equals(((Player)(obj)).nom);
     }
     
     @Override
     //On redefini pour le equals
     public int hashCode() {
-    return this.nom.hashCode();
+        
+        return this.nom.hashCode();
     }
 }
