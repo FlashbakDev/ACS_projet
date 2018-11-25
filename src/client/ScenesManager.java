@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -16,10 +18,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.Light;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -32,6 +36,8 @@ import rmi.Player;
  * @version 1.0
  */
 public class ScenesManager {
+
+    private boolean finduMatch;
 
     public enum SceneTypes {
 
@@ -76,9 +82,6 @@ public class ScenesManager {
 
         //Eventuellement faire un rebuild de la scene
         if (sceneType == SceneTypes.EVENTS) {
-
-            textArea_eventMessages.clear();
-            
             Map<Player, Integer> players = controller.getPlayersList();
             if(players != null && players.size() > 0)
                 choiceBox_joueurs.setItems(FXCollections.observableList(new ArrayList<>(players.keySet())));
@@ -86,7 +89,12 @@ public class ScenesManager {
             Set<String> pari = controller.getPariList();
             if(pari != null && pari.size() > 0)
                 choiceBox_pari.setItems(FXCollections.observableList(new ArrayList<>(pari)));
-            else System.err.println("osdjfpodsjf");
+            
+            
+           
+            
+        }else{
+             textArea_eventMessages.clear();
         }
 
         stage.setTitle(sceneType.toString());
@@ -123,6 +131,10 @@ public class ScenesManager {
     public void addMessage(String message) {
 
         ScrollBar scrollBar = (ScrollBar) textArea_eventMessages.lookup(".scroll-bar:vertical");
+        if(scrollBar==null){
+            System.err.println("Erreur, scrollBar pas encore instancié (pour une raison ? )");
+            return;
+        }
         if (scrollBar.valueProperty().get() == 1.0) {
 
             textArea_eventMessages.appendText(message + "\n");
@@ -247,10 +259,15 @@ public class ScenesManager {
         grid_right.getRowConstraints().add(new RowConstraints());
         grid_right.getRowConstraints().add(new RowConstraints());
         
+        
+        
+        /***Section Vote du joueur***/
         // grid_right content
         choiceBox_joueurs = new ChoiceBox<>();
         choiceBox_joueurs.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(choiceBox_joueurs, 0, 1);
+        
+      
         
         Button button_vote = new Button();
         button_vote.setText("Voter");
@@ -260,7 +277,16 @@ public class ScenesManager {
         });
         button_vote.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(button_vote, 1, 1);
+        button_vote.setDisable(true);
+        choiceBox_joueurs.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
+                System.out.println(choiceBox_joueurs.getItems().get((Integer) number2));
+                button_vote.setDisable(false);
+            }
+        });
         
+        /***Section pari***/
         // grid_right content
         choiceBox_pari = new ChoiceBox<>();
         choiceBox_pari.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -269,13 +295,23 @@ public class ScenesManager {
         Button button_pari = new Button();
         button_pari.setText("Parier");
         button_pari.setOnAction((ActionEvent event) -> {
-            
-            controller.onClickOnButton_pari(choiceBox_pari.getValue());
+            if(choiceBox_pari.getValue()!=null)
+                controller.onClickOnButton_pari(choiceBox_pari.getValue());
+            else System.err.println("value null");
         });
         button_pari.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(button_pari, 1, 2);
 
+        button_pari.setDisable(true);
+        choiceBox_pari.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
+                button_pari.setDisable(false);
+            }
+        });
         // add scene
         scenes.put(SceneTypes.EVENTS, new Scene(grid, 800, 600));
     }
+    
+    public void finduMatch(){this.finduMatch = true; }
 }

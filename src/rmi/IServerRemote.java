@@ -24,4 +24,6 @@ public interface IServerRemote extends Remote {
     public boolean vote(long id, Player j) throws RemoteException;
     
     public boolean pari(long id, String j) throws RemoteException;
+    
+    public List<String> getPassedLines()throws RemoteException;
 }

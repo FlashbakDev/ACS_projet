@@ -54,6 +54,12 @@ public class Client extends Application {
             id = serverRemote.connect(clientRemote);
 
             view.switchScene(ScenesManager.SceneTypes.EVENTS);
+            
+            List<String> passedlines = this.serverRemote.getPassedLines();
+            
+            for (String passedline : passedlines) {
+                this.view.addMessage(passedline);
+            }
 
         } catch (NotBoundException | MalformedURLException | RemoteException ex) {
 
@@ -78,9 +84,16 @@ public class Client extends Application {
         }
     }
 
+    /**
+     * Affiche tous ce qui est envoyer par le serveur
+     */
     public void onMessageReceived(String message) {
 
-        view.addMessage(message);
+        this.view.addMessage(message);
+    }
+    
+    public void onFinDuMatch(){
+        this.view.finduMatch();
     }
     
     /** Valide le vote */
@@ -200,6 +213,17 @@ public class Client extends Application {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        return null;
+    }
+    
+    
+    public List<String> getPassedLines(){
+        
+        try {
+            return this.serverRemote.getPassedLines();
+        } catch (RemoteException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return null;
     }
 }

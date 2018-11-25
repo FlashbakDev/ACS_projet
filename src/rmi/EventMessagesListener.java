@@ -21,4 +21,19 @@ public class EventMessagesListener extends UnicastRemoteObject implements IEvent
 
         client.onMessageReceived(message);
     }
+     @Override
+    public void EventFinDuMatch() throws RemoteException {
+
+        client.onFinDuMatch();
+    }
+
+    @Override
+    public void EventVoteGagnant() throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void EventPariGagnant() throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

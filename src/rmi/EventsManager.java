@@ -60,7 +60,7 @@ public class EventsManager extends Thread {
 
         ListIterator<String> itr = lines.listIterator(lines.size());
         int time = 0;
-        //int heurededepart =
+        
         String ligne = itr.previous();
         initListJoueur(ligne); //La premiere ligne est envoyé à l'initialisateur de joueurs
         this.match_en_cour = true;
@@ -95,8 +95,8 @@ public class EventsManager extends Thread {
             
         }
         this.match_en_cour = false;
-        Map.Entry<Player,Integer> meilleurs_joueur = this.getName_joueur_voté();
-        ligne = "Le joueur ayant obtenu le plus de vote est : " + meilleurs_joueur ;
+        serverRemote.finDuMatch();
+        ligne = "Le joueur ayant obtenu le plus de vote est : " + this.getName_joueur_voté() ;
         serverRemote.notifyListeners(ligne);
         passedLines.add(ligne);
         
@@ -115,7 +115,6 @@ public class EventsManager extends Thread {
         for (String names_joueur : names_joueurs) {
             playersVotes.put(new Player(names_joueur), 0);
         }
-        
     }
     
      /**
@@ -130,19 +129,24 @@ public class EventsManager extends Thread {
     /**
      * @since 1.2
      */
-    private Map.Entry<Player,Integer> getName_joueur_voté(){
+    private Map<Player,Integer> getName_joueur_voté(){
         
         Map.Entry<Player,Integer> maxEntry = null;
+        Map<Player,Integer> liste_j = new HashMap();
         
         for (Map.Entry<Player, Integer> entry : playersVotes.entrySet())
         {
             if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0)
             {
                 maxEntry = entry;
+                liste_j.clear();
+                liste_j.put(entry.getKey(),entry.getValue());
+            }else if(entry.getValue().compareTo(maxEntry.getValue()) == 0){
+                liste_j.put(entry.getKey(),entry.getValue());
             }
         }
        
-        return maxEntry;
+        return liste_j;
         
         
     }
@@ -169,6 +173,9 @@ public class EventsManager extends Thread {
         return false;
     }
     
+    /**
+     * Supprime le vote pour un joueur
+     */
     public boolean unvote(Player j){
         
         if(j != null && this.match_en_cour){
@@ -189,5 +196,5 @@ public class EventsManager extends Thread {
     public Map<Player, Integer> getPlayersVotes(){return this.playersVotes;}
     public Set<String> getPari(){return this.pari_equipe;}
     
-    public boolean getFinMatch(){return this.match_en_cour;};
+    public boolean getMatch_en_cour(){return this.match_en_cour;};
 }

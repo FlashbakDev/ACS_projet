@@ -3,7 +3,6 @@ package rmi;
 import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,11 +85,6 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
                         entry.getValue().connected = true;
                         entry.getValue().listener = listener;
 
-                        List<String> lines = eventsManager.getPassedLines();
-                        for (String line : lines) {
-                            entry.getValue().listener.EventMessageReceived(line);
-                        }
-
                         return entry.getValue().getId();
                     }
                 }
@@ -161,8 +155,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * @since 1.0
      */
     public void notifyListeners(String message) {
-
-        //System.out.println("ServerRemote.notifyListeners() : " + message);
+        
         clients.entrySet().forEach((entry) -> {
 
             if (entry.getValue().connected) {
@@ -182,6 +175,30 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
             }
         });
     }
+    
+    /**
+     * @since 1.0
+     */
+    public void finDuMatch(){
+         clients.entrySet().forEach((entry) -> {
+
+            if (entry.getValue().connected) {
+
+                try {
+                    
+                    entry.getValue().listener.EventFinDuMatch();
+                    
+                } catch (RemoteException ex) {
+
+                    Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
+
+                    // client is disconnected
+                    entry.getValue().connected = false;
+                    entry.getValue().listener = null;
+                }
+            }
+        });
+    }
 
     /**
      * @return la List de joueurs unique sur le serveur
@@ -190,10 +207,8 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      */
     @Override
     public Map<Player, Integer> getPlayersList() throws RemoteException{
-
         return eventsManager.getPlayersVotes();
     }
-    
     
       /**
      * @return la List de joueurs unique sur le serveur
@@ -202,11 +217,10 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      */
     @Override
    public Set<String> getPariList() throws RemoteException{
-
         return eventsManager.getPari();
     }
     /**
-     *
+     * Un vote est pris en compte uniquement si le match n'est pas terminé
      * @param id : L'identifiant du client.
      * @param j : L'identifiant du joueur
      * @return : indicateur de validité du vote.
@@ -215,7 +229,8 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     @Override
     public boolean vote(long id, Player j) throws RemoteException{
         
-        if(this.eventsManager.vote(j)){
+        if(j==null)return false;
+        if(this.eventsManager.getMatch_en_cour() && this.eventsManager.vote(j)){
             
             this.eventsManager.unvote(this.clients.get(id).vote);
             this.clients.get(id).vote = j;
@@ -229,17 +244,19 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     }
     
      /**
-     *
+     * Un pari est pris en compte uniquement si le match n'est pas terminé
      * @param id : L'identifiant du client.
-     * @param j : nom du vote
-     * @return : indicateur de validité du vote.
+     * @param j : nom du pari
+     * @return : indicateur de validité du pari.
      * @throws RemoteException
      */
     @Override
     public boolean pari(long id, String j) throws RemoteException{
         
-        if(!this.eventsManager.getFinMatch()){
-            this.clients.get(id).pari = j;
+        if(j == null)return false;
+        
+        if(this.eventsManager.getMatch_en_cour()){
+            this.clients.get(id).pari=(j);
             
             System.out.println( "["+id+"] paried for "+ j.toString());
             return true;
@@ -247,5 +264,11 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         
         System.out.println( "["+id+"] invalid pari : "+ j.toString());
         return false;
+    }
+    
+    
+    @Override
+    public List<String> getPassedLines()throws RemoteException{
+        return this.eventsManager.getPassedLines();
     }
 }
