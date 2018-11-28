@@ -193,7 +193,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
                     if(joueurs.containsValue(entry.getValue().vote)){
                         entry.getValue().listener.EventVoteGagnant();
                     }
-                } catch (RemoteException ex) {
+                } catch (RemoteException|NullPointerException  ex) {
 
                     Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
 

@@ -71,8 +71,11 @@ public class Client extends Application {
         try {
 
             serverRemote.disconnect(id);
-            UnicastRemoteObject.unexportObject(clientRemote, true);
-            UnicastRemoteObject.unexportObject(serverRemote, true);
+            //UnicastRemoteObject.unexportObject(clientRemote, true);
+            try{
+                UnicastRemoteObject.unexportObject(clientRemote, true);
+                UnicastRemoteObject.unexportObject(serverRemote, true);
+            }catch(java.rmi.NoSuchObjectException no){System.err.println("erreur de deconnexion"); }
             id = 0;
 
             view.switchScene(ScenesManager.SceneTypes.CONNECTION);
@@ -137,7 +140,12 @@ public class Client extends Application {
 
             serverRemote.disconnect(id);
             //UnicastRemoteObject.unexportObject(clientRemote, true);
-            UnicastRemoteObject.unexportObject(serverRemote, true);
+            try{
+                UnicastRemoteObject.unexportObject(clientRemote, true);
+                UnicastRemoteObject.unexportObject(serverRemote, true);
+            }catch(java.rmi.NoSuchObjectException no){
+                System.err.println("erreur de stop");
+            }
         }
     }
 
