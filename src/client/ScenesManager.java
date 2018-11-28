@@ -2,9 +2,9 @@ package client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -18,16 +18,15 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.effect.Light;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import rmi.Player;
 
 /**
@@ -69,6 +68,12 @@ public class ScenesManager {
         scenes = new HashMap<>();
 
         buildScenes();
+
+        this.stage.setOnCloseRequest((WindowEvent t) -> {
+
+            Platform.exit();
+            System.exit(0);
+        });
     }
 
     /**
@@ -83,18 +88,17 @@ public class ScenesManager {
         //Eventuellement faire un rebuild de la scene
         if (sceneType == SceneTypes.EVENTS) {
             Map<Player, Integer> players = controller.getPlayersList();
-            if(players != null && players.size() > 0)
+            if (players != null && players.size() > 0) {
                 choiceBox_joueurs.setItems(FXCollections.observableList(new ArrayList<>(players.keySet())));
-            
+            }
+
             Set<String> pari = controller.getPariList();
-            if(pari != null && pari.size() > 0)
+            if (pari != null && pari.size() > 0) {
                 choiceBox_pari.setItems(FXCollections.observableList(new ArrayList<>(pari)));
-            
-            
-           
-            
-        }else{
-             textArea_eventMessages.clear();
+            }
+
+        } else {
+            textArea_eventMessages.clear();
         }
 
         stage.setTitle(sceneType.toString());
@@ -131,7 +135,7 @@ public class ScenesManager {
     public void addMessage(String message) {
 
         ScrollBar scrollBar = (ScrollBar) textArea_eventMessages.lookup(".scroll-bar:vertical");
-        if(scrollBar==null){
+        if (scrollBar == null) {
             System.err.println("Erreur, scrollBar pas encore instancié (pour une raison ? )");
             return;
         }
@@ -220,7 +224,7 @@ public class ScenesManager {
 
         grid.getColumnConstraints().get(0).setHgrow(Priority.ALWAYS);
         grid.getColumnConstraints().get(1).setHgrow(Priority.ALWAYS);
-        
+
         // grid Content
         Text text_title = new Text("Suivie d'évènement");
         text_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
@@ -245,34 +249,30 @@ public class ScenesManager {
         grid_right.setVgap(10);
         grid_right.setPadding(new Insets(25, 25, 25, 25));
         grid_right.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        grid.add(grid_right, 1, 0, 3, 1);
-        
+        grid.add(grid_right, 1, 0, 1, 2);
+
         // 2 collumns
         grid_right.getColumnConstraints().add(new ColumnConstraints());
         grid_right.getColumnConstraints().add(new ColumnConstraints());
 
         grid_right.getColumnConstraints().get(0).setHgrow(Priority.ALWAYS);
         grid_right.getColumnConstraints().get(1).setHgrow(Priority.ALWAYS);
-        
+
         // 3 rows
         grid_right.getRowConstraints().add(new RowConstraints());
         grid_right.getRowConstraints().add(new RowConstraints());
         grid_right.getRowConstraints().add(new RowConstraints());
-        
-        
-        
-        /***Section Vote du joueur***/
+
+        /** *Section Vote du joueur** */
         // grid_right content
         choiceBox_joueurs = new ChoiceBox<>();
         choiceBox_joueurs.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(choiceBox_joueurs, 0, 1);
-        
-      
-        
+
         Button button_vote = new Button();
         button_vote.setText("Voter");
         button_vote.setOnAction((ActionEvent event) -> {
-            
+
             controller.onClickOnButton_vote(choiceBox_joueurs.getValue());
         });
         button_vote.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -285,19 +285,21 @@ public class ScenesManager {
                 button_vote.setDisable(false);
             }
         });
-        
-        /***Section pari***/
+
+        /** *Section pari** */
         // grid_right content
         choiceBox_pari = new ChoiceBox<>();
         choiceBox_pari.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(choiceBox_pari, 0, 2);
-        
+
         Button button_pari = new Button();
         button_pari.setText("Parier");
         button_pari.setOnAction((ActionEvent event) -> {
-            if(choiceBox_pari.getValue()!=null)
+            if (choiceBox_pari.getValue() != null) {
                 controller.onClickOnButton_pari(choiceBox_pari.getValue());
-            else System.err.println("value null");
+            } else {
+                System.err.println("value null");
+            }
         });
         button_pari.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(button_pari, 1, 2);
@@ -310,8 +312,10 @@ public class ScenesManager {
             }
         });
         // add scene
-        scenes.put(SceneTypes.EVENTS, new Scene(grid, 800, 600));
+        scenes.put(SceneTypes.EVENTS, new Scene(grid, 950, 600));
     }
-    
-    public void finduMatch(){this.finduMatch = true; }
+
+    public void finduMatch() {
+        this.finduMatch = true;
+    }
 }

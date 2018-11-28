@@ -5,9 +5,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,9 +51,9 @@ public class Client extends Application {
             id = serverRemote.connect(clientRemote);
 
             view.switchScene(ScenesManager.SceneTypes.EVENTS);
-            
+
             List<String> passedlines = this.serverRemote.getPassedLines();
-            
+
             for (String passedline : passedlines) {
                 this.view.addMessage(passedline);
             }
@@ -64,6 +61,7 @@ public class Client extends Application {
         } catch (NotBoundException | MalformedURLException | RemoteException ex) {
 
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            view.switchScene(ScenesManager.SceneTypes.CONNECTION);
         }
     }
 
@@ -74,6 +72,7 @@ public class Client extends Application {
 
             serverRemote.disconnect(id);
             UnicastRemoteObject.unexportObject(clientRemote, true);
+            UnicastRemoteObject.unexportObject(serverRemote, true);
             id = 0;
 
             view.switchScene(ScenesManager.SceneTypes.CONNECTION);
@@ -91,11 +90,11 @@ public class Client extends Application {
 
         this.view.addMessage(message);
     }
-    
-    public void onFinDuMatch(){
+
+    public void onFinDuMatch() {
         this.view.finduMatch();
     }
-    
+
     /** Valide le vote */
     public void onClickOnButton_vote(Player j) {
 
@@ -103,13 +102,14 @@ public class Client extends Application {
 
             serverRemote.vote(id, j);
 
+            UnicastRemoteObject.unexportObject(clientRemote, true);
         } catch (RemoteException ex) {
 
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-     /** Valide le pari */
+    /** Valide le pari */
     public void onClickOnButton_pari(String j) {
 
         try {
@@ -121,6 +121,7 @@ public class Client extends Application {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     /**
      * Include clean server disconnection.
      *
@@ -128,12 +129,15 @@ public class Client extends Application {
      */
     @Override
     public void stop() throws Exception {
-        super.stop(); //To change body of generated methods, choose Tools | Templates.
+        super.stop();
+
+        System.out.println("client.Client.stop()");
 
         if (id > 0) {
 
             serverRemote.disconnect(id);
             UnicastRemoteObject.unexportObject(clientRemote, true);
+            UnicastRemoteObject.unexportObject(serverRemote, true);
         }
     }
 
@@ -145,39 +149,7 @@ public class Client extends Application {
         System.out.println("Client start");
 
         launch(args);
-      
-    }
 
-    /**
-     * https://howtodoinjava.com/security/how-to-generate-secure-password-hash-md5-sha-pbkdf2-bcrypt-examples/
-     *
-     * @return the salt for hashing
-     * @throws NoSuchAlgorithmException
-     */
-    private static byte[] getSalt() throws NoSuchAlgorithmException {
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-        byte[] salt = new byte[16];
-        sr.nextBytes(salt);
-        return salt;
-    }
-
-    private static String get_SHA_512_SecurePassword(String passwordToHash, byte[] salt) {
-        String generatedPassword = null;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-512");
-            md.update(salt);
-            byte[] bytes = md.digest(passwordToHash.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < bytes.length; i++) {
-                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-            }
-            generatedPassword = sb.toString();
-        } catch (NoSuchAlgorithmException ex) {
-
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return generatedPassword;
     }
 
     /**
@@ -187,38 +159,37 @@ public class Client extends Application {
     public Map<Player, Integer> getPlayersList() {
 
         try {
-            
+
             return serverRemote.getPlayersList();
-            
+
         } catch (RemoteException ex) {
-            
+
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return null;
     }
-    
-      /**
+
+    /**
      *
      * @return La liste des joueurs
      */
     public Set<String> getPariList() {
 
         try {
-            
+
             return serverRemote.getPariList();
-            
+
         } catch (RemoteException ex) {
-            
+
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return null;
     }
-    
-    
-    public List<String> getPassedLines(){
-        
+
+    public List<String> getPassedLines() {
+
         try {
             return this.serverRemote.getPassedLines();
         } catch (RemoteException ex) {
