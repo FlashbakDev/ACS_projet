@@ -16,26 +16,40 @@ import java.util.logging.Logger;
 
 /**
  *
+ * Gere les evenements (lecture du fichier d'evenement)
+ * + Envoie des evenements aux clients.
+ * Sert aussi pour l'enregistrement des decisions de clients.
  * @author Benjamin
  * @version 1.2
  */
 public class EventsManager extends Thread {
 
+    /**Le gestionnaire de vitesse pour les evenements*/
     private static final float timeSpeed = 1.0f; // 1 min = 1 seconde
+    /**L'instance RMI*/
     private final ServerRemote serverRemote;
+    /**Une liste de toute les lignes de texte du fichier d'evenement*/
     private List<String> lines;
+    /**Une liste de tout les messages envoyé aux clients*/
     private List<String> passedLines;
+    /**La liste des joueurs ainsi que leur nombre de votes*/
     private Map<Player, Integer> playersVotes;
-    boolean match_en_cour = false;
+    /**Indique si un match est en cour ou non*/
+    private boolean match_en_cour = false; //Sert pour autoriser les votes/pari
+    /**La liste des options de pari*/
     private Set<String> pari_equipe;
+    /**L'option gagnante des pari. Pas necessairement inclu dans pari_equipe*/
     private String gagnant;
 
     /**
-     * @param contract
-     * @param fileName
+     * Constructeur, il initialise les attributs, et recupere l'intégralité 
+     * du fichier texte. (On pourrait surement economiser de la Ram en lisant le fichier à la volé ... )
+     * @param contract : L'instance rmi
+     * @param fileName : Le nom du fichier à lire
      * @since 1.0
+     * @throws IOException Si le fichier n'est pas valide.
      */
-    public EventsManager(ServerRemote contract, String fileName) {
+    public EventsManager(ServerRemote contract, String fileName) throws IOException{
 
         this.serverRemote = contract;
         lines = new ArrayList<>();
@@ -44,14 +58,10 @@ public class EventsManager extends Thread {
         this.playersVotes = new HashMap<Player, Integer>();
         this.pari_equipe = new HashSet<String>();
 
-        try {
+       
+        lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
 
-            lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
-
-        } catch (IOException ex) {
-
-            Logger.getLogger(EventsManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
     }
 
     /**

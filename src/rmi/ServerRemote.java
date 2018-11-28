@@ -1,5 +1,6 @@
 package rmi;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
@@ -25,14 +26,15 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * @since 1.0
      * @throws RemoteException
      */
-    public ServerRemote() throws RemoteException {
+    public ServerRemote() throws RemoteException, IOException{
         super();
+       
+            eventsManager = new EventsManager(this, "Events/test.txt");
+            clients = new HashMap<>();
+            ids = 0;
 
-        eventsManager = new EventsManager(this, "Events/test.txt");
-        clients = new HashMap<>();
-        ids = 0;
-
-        eventsManager.start();
+            eventsManager.start();
+        
     }
 
     /**
@@ -55,13 +57,14 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         return "Hello world !";
     }
 
-    /** Fonction qui s'execute à chaque connexion de client
+    /** 
+     * Fonction qui s'execute à chaque connexion de client
      * Verifie dans la table des clients si le client qui se connecte est
      * nouveau ou ancien.
      *
      * @param listener
      * @return
-     * @throws java.rmi.RemoteException
+     * @throws java.rmi.RemoteException si le rmiregistry 'est inactif
      * @since 1.0
      */
     @Override
@@ -108,7 +111,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
     /**
      * Fonction qui deconnecte un client
-     *
+     * Ne le supprime pas des listes de clients
      * @param id : L'id du client à deconnecté
      * @return indication de deconnexion du client
      * @throws RemoteException
@@ -143,6 +146,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
     //peut etre synchronized ?
     /**
+     * Incremente les id des clients
      * @since 1.0
      */
     private long getNextId() {
@@ -152,6 +156,8 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     }
 
     /**
+     * Envoie un message à tous les clients connecté
+     * @param message : Le message à envoyer aux clients
      * @since 1.0
      */
     public void notifyListeners(String message) {
@@ -177,6 +183,11 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     }
     
     /**
+     * S'active à la fin d'un match. Avertie les clients de l'arret du match
+     * Envoie aux clients concerné les infos sur les reussites aux pari ou vote
+     * 
+     * @param joueurs : La map des joueurs ex aequo ayant eu le plus de vote
+     * @param resulat : Le resultat du match
      * @since 1.0
      */
     public void finDuMatch(String resulat, Map<Player, Integer> joueurs){
@@ -190,7 +201,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
                     if(entry.getValue().pari.equals(resulat)){
                         entry.getValue().listener.EventPariGagnant();
                     }
-                    if(joueurs.containsValue(entry.getValue().vote)){
+                    if(joueurs.containsKey(entry.getValue().vote)){
                         entry.getValue().listener.EventVoteGagnant();
                     }
                 } catch (RemoteException|NullPointerException  ex) {

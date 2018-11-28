@@ -7,6 +7,7 @@ import java.rmi.server.UnicastRemoteObject;
 /**
  *
  * @author Benjamin
+ * Classe qui Gere les messages du serveur vers les clients.
  */
 public class EventMessagesListener extends UnicastRemoteObject implements IEventMessagesListener {
 

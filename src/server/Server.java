@@ -5,9 +5,13 @@
  */
 package server;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import rmi.EventsManager;
 import rmi.ServerRemote;
 
 /**
@@ -24,6 +28,11 @@ public class Server {
     }
 
     //Verifier que rmi est lancer
+    /**
+     * Initialise le serveur 
+     * Peut provoquer des erreurs si le rmiregistry n'est pas actif
+     * ou si le fichier d'evenement n'est pas valide
+     */
     public void init() {
 
         System.out.println("Server start");
@@ -41,8 +50,11 @@ public class Server {
             System.out.println("Server ready.");
 
         } catch (MalformedURLException | RemoteException e) {
-
+               //Erreur de rmi
             System.out.println(e);
+        }catch (IOException ex) {
+            //Fichier non valide
+            Logger.getLogger(EventsManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
