@@ -179,7 +179,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     /**
      * @since 1.0
      */
-    public void finDuMatch(){
+    public void finDuMatch(String resulat, Map<Player, Integer> joueurs){
          clients.entrySet().forEach((entry) -> {
 
             if (entry.getValue().connected) {
@@ -187,7 +187,12 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
                 try {
                     
                     entry.getValue().listener.EventFinDuMatch();
-                    
+                    if(entry.getValue().pari.equals(resulat)){
+                        entry.getValue().listener.EventPariGagnant();
+                    }
+                    if(joueurs.containsValue(entry.getValue().vote)){
+                        entry.getValue().listener.EventVoteGagnant();
+                    }
                 } catch (RemoteException ex) {
 
                     Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);

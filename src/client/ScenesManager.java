@@ -51,6 +51,8 @@ public class ScenesManager {
     private ChoiceBox<Player> choiceBox_joueurs;
     private ChoiceBox<String> choiceBox_pari;
 
+    private Button button_vote;
+    private Button button_pari;
     /**
      * Utile plus tard pour faire un clean plus propre de la scene précédente
      * lors d'un switch
@@ -269,7 +271,7 @@ public class ScenesManager {
         choiceBox_joueurs.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(choiceBox_joueurs, 0, 1);
 
-        Button button_vote = new Button();
+        button_vote = new Button();
         button_vote.setText("Voter");
         button_vote.setOnAction((ActionEvent event) -> {
 
@@ -282,7 +284,8 @@ public class ScenesManager {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
                 System.out.println(choiceBox_joueurs.getItems().get((Integer) number2));
-                button_vote.setDisable(false);
+                if(!finduMatch)
+                    button_vote.setDisable(false);
             }
         });
 
@@ -292,7 +295,7 @@ public class ScenesManager {
         choiceBox_pari.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(choiceBox_pari, 0, 2);
 
-        Button button_pari = new Button();
+        button_pari = new Button();
         button_pari.setText("Parier");
         button_pari.setOnAction((ActionEvent event) -> {
             if (choiceBox_pari.getValue() != null) {
@@ -308,7 +311,8 @@ public class ScenesManager {
         choiceBox_pari.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                button_pari.setDisable(false);
+                if(!finduMatch)
+                    button_pari.setDisable(false);
             }
         });
         // add scene
@@ -317,5 +321,7 @@ public class ScenesManager {
 
     public void finduMatch() {
         this.finduMatch = true;
+        button_pari.setDisable(true);
+        button_vote.setDisable(true);
     }
 }

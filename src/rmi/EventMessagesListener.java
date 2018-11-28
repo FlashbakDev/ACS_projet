@@ -29,11 +29,11 @@ public class EventMessagesListener extends UnicastRemoteObject implements IEvent
 
     @Override
     public void EventVoteGagnant() throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        client.onMessageReceived("Felicitation, tu as voté pour le meilleur joueur ! ");
     }
 
     @Override
     public void EventPariGagnant() throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+       client.onMessageReceived("Felicitation, tu as predit le resultat ! ");
     }
 }

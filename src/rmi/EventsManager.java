@@ -28,6 +28,7 @@ public class EventsManager extends Thread {
     private Map<Player, Integer> playersVotes;
     boolean match_en_cour = false;
     private Set<String> pari_equipe;
+    private String gagnant;
 
     /**
      * @param contract
@@ -65,6 +66,8 @@ public class EventsManager extends Thread {
         String ligne = itr.previous();
         this.initPariPossible(ligne);
         ligne = itr.previous();
+        this.gagnant = ligne.split(":")[1];
+        ligne = itr.previous();
         this.initListJoueur(ligne); //La premiere ligne est envoyé à l'initialisateur de joueurs
         this.match_en_cour = true;
         while (itr.hasPrevious()) {
@@ -98,8 +101,9 @@ public class EventsManager extends Thread {
 
         }
         this.match_en_cour = false;
-        serverRemote.finDuMatch();
-        ligne = "Le(s) joueur(s) ayant obtenu le plus de vote est/sont : " + this.getName_joueur_voté();
+        Map<Player, Integer> joueurs_elu = this.getName_joueur_voté();
+        serverRemote.finDuMatch(this.gagnant, joueurs_elu);
+        ligne = "Le(s) joueur(s) ayant obtenu le plus de vote est/sont : " + joueurs_elu;
         serverRemote.notifyListeners(ligne);
         passedLines.add(ligne);
 
