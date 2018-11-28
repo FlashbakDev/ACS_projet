@@ -102,7 +102,7 @@ public class Client extends Application {
 
             serverRemote.vote(id, j);
 
-            UnicastRemoteObject.unexportObject(clientRemote, true);
+           
         } catch (RemoteException ex) {
 
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -136,7 +136,7 @@ public class Client extends Application {
         if (id > 0) {
 
             serverRemote.disconnect(id);
-            UnicastRemoteObject.unexportObject(clientRemote, true);
+            //UnicastRemoteObject.unexportObject(clientRemote, true);
             UnicastRemoteObject.unexportObject(serverRemote, true);
         }
     }

@@ -71,11 +71,6 @@ public class ScenesManager {
 
         buildScenes();
 
-        this.stage.setOnCloseRequest((WindowEvent t) -> {
-
-            Platform.exit();
-            System.exit(0);
-        });
     }
 
     /**

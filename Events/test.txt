@@ -103,4 +103,3 @@
 0 Les Joueurs :Mateo,Jonathan,Romain,Mauricio,Bethune,Anthony
 0 Resultat :victoire equipe 1
 0 Resultats possibles :victoire equipe 1,victoire equipe 2,égalité
-
