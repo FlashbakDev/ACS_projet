@@ -9,32 +9,32 @@ import java.rmi.server.UnicastRemoteObject;
  * @author Benjamin
  * Classe qui Gere les messages du serveur vers les clients.
  */
-public class EventMessagesListener extends UnicastRemoteObject implements IEventMessagesListener {
+public class ClientListener extends UnicastRemoteObject implements IClientListener {
 
     private final Client client;
 
-    public EventMessagesListener(Client client) throws RemoteException {
+    public ClientListener(Client client) throws RemoteException {
         this.client = client;
     }
 
     @Override
-    public void EventMessageReceived(String message) throws RemoteException {
+    public void EventMessage(String message) throws RemoteException {
 
         client.onMessageReceived(message);
     }
      @Override
-    public void EventFinDuMatch() throws RemoteException {
+    public void EventEnd() throws RemoteException {
 
         client.onFinDuMatch();
     }
 
     @Override
-    public void EventVoteGagnant() throws RemoteException {
+    public void EventGoodVote() throws RemoteException {
         client.onMessageReceived("Felicitation, tu as voté pour le meilleur joueur ! ");
     }
 
     @Override
-    public void EventPariGagnant() throws RemoteException {
+    public void EventGoodBet() throws RemoteException {
        client.onMessageReceived("Felicitation, tu as predit le resultat ! ");
     }
 }

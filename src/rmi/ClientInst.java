@@ -13,7 +13,7 @@ public class ClientInst {
     /**Indique si le client est connecter (le serveur n'envoie pas de messages 
      * aux clients deconnecter)*/
     public boolean connected;
-    public IEventMessagesListener listener;
+    public IClientListener listener;
     /**Le joueur pour qui le client à voter.*/
     public Player vote = null; 
     /**Le pari sur le resultat du client*/
@@ -26,7 +26,7 @@ public class ClientInst {
      * @param listener : L'objet permettant au serveur de communiquer avec les 
      * clients
      */
-    public ClientInst(long id, String ip, IEventMessagesListener listener) {
+    public ClientInst(long id, String ip, IClientListener listener) {
 
         this.id = id;
         this.ip = ip;

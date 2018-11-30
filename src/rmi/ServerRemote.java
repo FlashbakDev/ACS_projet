@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ import java.util.logging.Logger;
  * Classe communiquante rmi, le client utilise ses methodes pour les actions sur 
  * le serveur. 
  * @author Benjamin
- * @version 1.1
+ * @version 1.2
  */
 public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
@@ -31,12 +32,11 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     public ServerRemote() throws RemoteException, IOException{
         super();
        
-            eventsManager = new EventsManager(this, "Events/test.txt");
-            clients = new HashMap<>();
-            ids = 0;
+        eventsManager = new EventsManager(this, "Events/test.txt");
+        clients = new HashMap<>();
+        ids = 0;
 
-            eventsManager.start();
-        
+        eventsManager.start();
     }
 
 
@@ -51,7 +51,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * @since 1.0
      */
     @Override
-    public long connect(IEventMessagesListener listener) throws RemoteException {
+    public long connect(IClientListener listener) throws RemoteException {
 
         try {
 
@@ -154,7 +154,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
                 try {
 
-                    entry.getValue().listener.EventMessageReceived(message);
+                    entry.getValue().listener.EventMessage(message);
 
                 } catch (RemoteException ex) {
 
@@ -183,12 +183,12 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
                 try {
                     
-                    entry.getValue().listener.EventFinDuMatch();
+                    entry.getValue().listener.EventEnd();
                     if(entry.getValue().pari.equals(resulat)){
-                        entry.getValue().listener.EventPariGagnant();
+                        entry.getValue().listener.EventGoodBet();
                     }
                     if(joueurs.containsKey(entry.getValue().vote)){
-                        entry.getValue().listener.EventVoteGagnant();
+                        entry.getValue().listener.EventGoodVote();
                     }
                 } catch (RemoteException|NullPointerException  ex) {
 
@@ -202,75 +202,74 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         });
     }
 
-    /**
-     * @return la List de joueurs unique sur le serveur
-     * @throws java.rmi.RemoteException
-     * @since 1.1
-     */
     @Override
-    public Map<Player, Integer> getPlayersList() throws RemoteException{
-        return eventsManager.getPlayersVotes();
+    public Set<Player> getPlayersList(long id) throws RemoteException{
+        
+        log(this.clients.get(id),"Retrieve players list.");
+        
+        return eventsManager.getPlayersVotes().keySet();
     }
     
-      /**
-     * @return la List de joueurs unique sur le serveur
-     * @throws java.rmi.RemoteException
-     * @since 1.1
-     */
     @Override
-   public Set<String> getPariList() throws RemoteException{
-        return eventsManager.getPari();
+    public Set<String> getAvailableBets(long id) throws RemoteException{
+       
+        log(this.clients.get(id),"Retrieve available bet.");
+        
+        return eventsManager.getAvailableBets();
     }
-    /**
-     * Un vote est pris en compte uniquement si le match n'est pas terminé
-     * @param id : L'identifiant du client.
-     * @param j : L'identifiant du joueur
-     * @return : indicateur de validité du vote.
-     * @throws RemoteException
-     */
+    
     @Override
     public boolean vote(long id, Player j) throws RemoteException{
         
-        if(j==null)return false;
-        if(this.eventsManager.getMatch_en_cour() && this.eventsManager.vote(j)){
+        if(j == null)
+            return false;
+        
+        ClientInst client = this.clients.get(id);
+        
+        if(this.eventsManager.vote(j)){
             
-            this.eventsManager.unvote(this.clients.get(id).vote);
-            this.clients.get(id).vote = j;
+            // Annulation du vote précédent et enregistrement du nouveau
+            this.eventsManager.unvote(client.vote);
+            client.vote = j;
             
-            System.out.println( "["+id+"] voted for "+ j.toString());
+            log(client, "voted for "+ j );
             return true;
         }
         
-        System.out.println( "["+id+"] invalid vote : "+ j.toString());
+        log(client, "Invalid vote ("+ j +")");
         return false;
     }
     
-     /**
-     * Un pari est pris en compte uniquement si le match n'est pas terminé
-     * @param id : L'identifiant du client.
-     * @param j : nom du pari
-     * @return : indicateur de validité du pari.
-     * @throws RemoteException
-     */
     @Override
-    public boolean pari(long id, String j) throws RemoteException{
+    public boolean bet(long id, String b) throws RemoteException{
         
-        if(j == null)return false;
+        if(b == null)
+            return false;
         
-        if(this.eventsManager.getMatch_en_cour()){
-            this.clients.get(id).pari=(j);
+        ClientInst client = this.clients.get(id);
+        
+        if(this.eventsManager.getIsEventRunning()){
             
-            System.out.println( "["+id+"] paried for "+ j.toString());
+            client.pari = b;
+            
+            log( client, "bet for "+ b );
             return true;
         }
         
-        System.out.println( "["+id+"] invalid pari : "+ j.toString());
+        log( client, "bet error ("+ b +")" );
         return false;
     }
     
-    
     @Override
-    public List<String> getPassedLines()throws RemoteException{
-        return this.eventsManager.getPassedLines();
+    public List<String> getEventHistory(long id)throws RemoteException{
+        
+        log(this.clients.get(id),"Retrieve event history.");
+        
+        return this.eventsManager.getHistory();
+    }
+    
+    private void log(ClientInst c, String s){
+        
+        System.out.println("[" + c.toString() + "] "+ s);
     }
 }

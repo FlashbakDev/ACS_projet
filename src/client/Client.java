@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import rmi.EventMessagesListener;
+import rmi.ClientListener;
 import rmi.IServerRemote;
 import rmi.Player;
 
@@ -26,7 +26,7 @@ public class Client extends Application {
 
     private IServerRemote serverRemote;
     private ScenesManager view;
-    private EventMessagesListener clientRemote;
+    private ClientListener clientRemote;
     private long id;
 
     @Override
@@ -49,19 +49,22 @@ public class Client extends Application {
         try {
 
             serverRemote = (IServerRemote) Naming.lookup(url);
-            clientRemote = new EventMessagesListener(this);
+            clientRemote = new ClientListener(this);
             id = serverRemote.connect(clientRemote);
+            
             if(id <0){
+                
                 UnicastRemoteObject.unexportObject(clientRemote, true);
                 throw new NotBoundException("Erreur à la connexion");
             }
+            
             view.switchScene(ScenesManager.SceneTypes.EVENTS);
 
-            List<String> passedlines = this.serverRemote.getPassedLines();
+            List<String> passedlines = this.serverRemote.getEventHistory();
 
-            for (String passedline : passedlines) {
+            passedlines.forEach((passedline) -> {
                 this.view.addMessage(passedline);
-            }
+            });
 
         } catch (NotBoundException | MalformedURLException | RemoteException ex) {
 
@@ -81,11 +84,16 @@ public class Client extends Application {
             serverRemote.disconnect(id);
             //UnicastRemoteObject.unexportObject(clientRemote, true);
             try{
+                
                 UnicastRemoteObject.unexportObject(clientRemote, true);
                 UnicastRemoteObject.unexportObject(serverRemote, true);
-            }catch(java.rmi.NoSuchObjectException no){System.err.println("erreur de deconnexion"); }
+                
+            }catch(java.rmi.NoSuchObjectException no){
+                
+                System.err.println("erreur de deconnexion"); 
+            }
+            
             id = 0;
-
             view.switchScene(ScenesManager.SceneTypes.CONNECTION);
 
         } catch (RemoteException ex) {
@@ -121,8 +129,7 @@ public class Client extends Application {
         try {
 
             serverRemote.vote(id, j);
-
-           
+            
         } catch (RemoteException ex) {
 
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -138,7 +145,7 @@ public class Client extends Application {
 
         try {
 
-            serverRemote.pari(id, j);
+            serverRemote.bet(id, j);
 
         } catch (RemoteException ex) {
 
@@ -160,11 +167,14 @@ public class Client extends Application {
         if (id > 0) {
 
             serverRemote.disconnect(id);
-            //UnicastRemoteObject.unexportObject(clientRemote, true);
+            
             try{
+                
                 UnicastRemoteObject.unexportObject(clientRemote, true);
                 UnicastRemoteObject.unexportObject(serverRemote, true);
+                
             }catch(java.rmi.NoSuchObjectException no){
+                
                 //parfois les unexport leve une exception, des fois non. 
                 //Mais sa marche jamais si on les met pas
                 //Alors on capture et on se pose pas de question.
@@ -180,9 +190,7 @@ public class Client extends Application {
     public static void main(String[] args) {
 
         System.out.println("Client start");
-
         launch(args);
-
     }
 
     /**
@@ -190,9 +198,8 @@ public class Client extends Application {
      * @return La liste des joueurs, et le nombre de vote de chacun. 
      * 
      */
-    public Map<Player, Integer> getPlayersList() {
-        //Faudrait peut etre que la liste des joueurs ne comprenne pas le nombre de vote
-        //Parsqu'on s'en sert pas...
+    public List<Player> getPlayersList() {
+        
         try {
 
             return serverRemote.getPlayersList();
@@ -209,11 +216,11 @@ public class Client extends Application {
      *
      * @return La liste des resultats pariables
      */
-    public Set<String> getPariList() {
+    public List<String> getPariList() {
 
         try {
 
-            return serverRemote.getPariList();
+            return serverRemote.getAvailableBets();
 
         } catch (RemoteException ex) {
 
@@ -231,10 +238,14 @@ public class Client extends Application {
     public List<String> getPassedLines() {
 
         try {
-            return this.serverRemote.getPassedLines();
+            
+            return this.serverRemote.getEventHistory();
+            
         } catch (RemoteException ex) {
+            
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
         return null;
     }
 }

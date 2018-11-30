@@ -12,16 +12,40 @@ import java.util.Set;
  */
 public interface IServerRemote extends Remote {
 
-    public long connect(IEventMessagesListener listener) throws RemoteException;
-
+    public long connect(IClientListener listener) throws RemoteException;
     public boolean disconnect(long id) throws RemoteException;
 
-    public Map<Player, Integer> getPlayersList() throws RemoteException;
-    public Set<String> getPariList() throws RemoteException;
+    /**
+     * @return la List de joueurs unique sur le serveur
+     * @throws java.rmi.RemoteException
+     * @since 1.1
+     */
+    public Set<Player> getPlayersList(long id) throws RemoteException;
+
+    /**
+     * @return la List de joueurs unique sur le serveur
+     * @throws java.rmi.RemoteException
+     * @since 1.1
+     */
+    public Set<String> getAvailableBets(long id) throws RemoteException;
     
+    /**
+     * Un vote est pris en compte uniquement si le match n'est pas terminé
+     * @param id : L'identifiant du client.
+     * @param j : L'identifiant du joueur
+     * @return : indicateur de validité du vote.
+     * @throws RemoteException
+     */
     public boolean vote(long id, Player j) throws RemoteException;
     
-    public boolean pari(long id, String j) throws RemoteException;
+    /**
+     * Un pari est pris en compte uniquement si le match n'est pas terminé
+     * @param id : L'identifiant du client.
+     * @param b : pari
+     * @return : indicateur de validité du pari.
+     * @throws RemoteException
+     */
+    public boolean bet(long id, String b) throws RemoteException;
     
-    public List<String> getPassedLines()throws RemoteException;
+    public List<String> getEventHistory(long id)throws RemoteException;
 }
