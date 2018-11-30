@@ -36,7 +36,8 @@ public class Client extends Application {
         view.switchScene(ScenesManager.SceneTypes.CONNECTION);
     }
 
-    /** Initialise la connexion rmi puis Change la vue
+    /** 
+     * Initialise la connexion rmi puis Change la vue
      *
      * @param ipAdress : Adresse ip du serveur distant
      */
@@ -68,7 +69,10 @@ public class Client extends Application {
         }
     }
 
-    /** Ferme la connexion */
+    /**
+     * Ferme la connexion 
+     *      
+     */
     public void onClickOnButton_disconnect() {
 
         try {
@@ -91,17 +95,26 @@ public class Client extends Application {
 
     /**
      * Affiche tous ce qui est envoyer par le serveur
+     * @param message : objet à afficher dans l'ihm
      */
     public void onMessageReceived(String message) {
 
         this.view.addMessage(message);
     }
 
+    /**
+     * Action activivé pas le listener pour 
+     * mettre à jour l'indicateur de fin du match
+     */
     public void onFinDuMatch() {
         this.view.finduMatch();
     }
 
-    /** Valide le vote */
+    /** 
+     * Action activé par les événements ihm
+     * Envoie un vote au serveur
+     * @param j : Le joueur pour qui l'utilisateur vote
+     */
     public void onClickOnButton_vote(Player j) {
 
         try {
@@ -115,7 +128,11 @@ public class Client extends Application {
         }
     }
 
-    /** Valide le pari */
+    /** 
+     * Action activé par les événements ihm
+     * Envoie un pari au serveur
+     * @param j : Le resultat sur lequel l'utilisateur pari
+     */
     public void onClickOnButton_pari(String j) {
 
         try {
@@ -147,12 +164,16 @@ public class Client extends Application {
                 UnicastRemoteObject.unexportObject(clientRemote, true);
                 UnicastRemoteObject.unexportObject(serverRemote, true);
             }catch(java.rmi.NoSuchObjectException no){
+                //parfois les unexport leve une exception, des fois non. 
+                //Mais sa marche jamais si on les met pas
+                //Alors on capture et on se pose pas de question.
                 System.err.println("erreur de stop");
             }
         }
     }
 
     /**
+     * Pointd'entrée du programme
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -165,10 +186,12 @@ public class Client extends Application {
 
     /**
      *
-     * @return La liste des joueurs
+     * @return La liste des joueurs, et le nombre de vote de chacun. 
+     * 
      */
     public Map<Player, Integer> getPlayersList() {
-
+        //Faudrait peut etre que la liste des joueurs ne comprenne pas le nombre de vote
+        //Parsqu'on s'en sert pas...
         try {
 
             return serverRemote.getPlayersList();
@@ -183,7 +206,7 @@ public class Client extends Application {
 
     /**
      *
-     * @return La liste des joueurs
+     * @return La liste des resultats pariables
      */
     public Set<String> getPariList() {
 
@@ -199,6 +222,11 @@ public class Client extends Application {
         return null;
     }
 
+    /**
+     * @return Recupere une liste de toutes les lignes envoyé par le serveur. 
+     * (La liste est celle du serveur, c'est independant de ce que le client 
+     * a obtenu. Ne comprend pas les messages individuel (Pari gagnant etc ... )
+     */
     public List<String> getPassedLines() {
 
         try {
