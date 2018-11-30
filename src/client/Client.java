@@ -49,7 +49,10 @@ public class Client extends Application {
             serverRemote = (IServerRemote) Naming.lookup(url);
             clientRemote = new EventMessagesListener(this);
             id = serverRemote.connect(clientRemote);
-
+            if(id <0){
+                UnicastRemoteObject.unexportObject(clientRemote, true);
+                throw new NotBoundException("Erreur à la connexion");
+            }
             view.switchScene(ScenesManager.SceneTypes.EVENTS);
 
             List<String> passedlines = this.serverRemote.getPassedLines();

@@ -74,7 +74,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
             String ip = getClientHost();
 
-            System.out.println("[" + ip + "] ServerRemote.connect()");
+            System.out.println("[" + ip + "]ServerRemote.connect()");
 
             // already exists
             for (Map.Entry<Long, ClientInst> entry : clients.entrySet()) {
@@ -89,6 +89,9 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
                         entry.getValue().listener = listener;
 
                         return entry.getValue().getId();
+                    }else{
+                        System.out.println("[" + ip + "] already connected");
+                        return -2;
                     }
                 }
             }
