@@ -62,7 +62,7 @@ public class Client extends Application {
 
             List<String> history = this.serverRemote.getEventHistory(id);
 
-            history.forEach((passedline) -> { 
+            history.forEach((passedline) -> {
                 this.view.addMessage(passedline); 
             });
 
@@ -86,7 +86,7 @@ public class Client extends Application {
             try{
                 
                 UnicastRemoteObject.unexportObject(clientRemote, true);
-                UnicastRemoteObject.unexportObject(serverRemote, true);
+                //UnicastRemoteObject.unexportObject(serverRemote, true);
                 
             }catch(NoSuchObjectException ex){
                 
@@ -172,7 +172,7 @@ public class Client extends Application {
             try{
                 
                 UnicastRemoteObject.unexportObject(clientRemote, true);
-                UnicastRemoteObject.unexportObject(serverRemote, true);
+                //UnicastRemoteObject.unexportObject(serverRemote, true);
                 
             }catch(NoSuchObjectException ex){
                 

@@ -12,7 +12,7 @@ public class ClientListener extends UnicastRemoteObject implements IClientListen
 
     private final Client client;
 
-    public ClientListener(Client client){
+    public ClientListener(Client client) throws RemoteException {
         
         this.client = client;
     }

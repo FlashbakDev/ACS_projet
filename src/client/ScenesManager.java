@@ -122,27 +122,35 @@ public class ScenesManager {
      * @param message message to append
      * @since 1.0
      */
-    public void addMessage(String message) {
+    synchronized public void addMessage(String message) {
 
-        ScrollBar scrollBar = (ScrollBar) textArea_messages.lookup(".scroll-bar:vertical");
+        try{
         
-        if( scrollBar != null ){
-            
-            if (scrollBar.valueProperty().get() == 1.0) {
+            ScrollBar scrollBar = (ScrollBar) textArea_messages.lookup(".scroll-bar:vertical");
 
-                textArea_messages.appendText(message + "\n");
-            
-            } else {
+            if( scrollBar != null ){
 
-                int caretPosition = textArea_messages.caretPositionProperty().get();
-                textArea_messages.appendText(message + "\n");
-                textArea_messages.positionCaret(caretPosition);
+                if (scrollBar.valueProperty().get() == 1.0) {
+
+                    textArea_messages.appendText(message + "\n");
+                    scrollBar.setValue(1.0);
+
+                } else {
+
+                    int caretPosition = textArea_messages.caretPositionProperty().get();
+                    textArea_messages.appendText(message + "\n");
+                    textArea_messages.positionCaret(caretPosition);
+                }
             }
+            else{
+
+                textArea_messages.appendText(message + "\n");
+            }
+        
         }
-        else{
+        catch(Exception ex){
             
-            System.out.println("client.ScenesManager.addMessage() : scrollBar = null !");
-            textArea_messages.appendText(message + "\n");
+            System.out.println("client.ScenesManager.addMessage() : exception = "+ ex);
         }
     }
 

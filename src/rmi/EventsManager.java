@@ -75,10 +75,10 @@ public class EventsManager extends Thread {
         resetEvent();
         lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
         
-        ListIterator<String> itr = lines.listIterator();
-        
-        this.initValidBets(itr.next());
-        this.initPlayers(itr.next()); 
+        this.initValidBets(lines.get(0));
+        lines.remove(0);
+        this.initPlayers(lines.get(0)); 
+        lines.remove(0);
         
         start();
     }
@@ -148,7 +148,6 @@ public class EventsManager extends Thread {
                 time += waitTime;
                 
                 serverRemote.sendEventMessage(line);
-                lines.remove(line);
                 history.add(line);
 
             } catch (InterruptedException | NumberFormatException ex) {
