@@ -12,8 +12,6 @@ import java.util.Set;
  */
 public interface IServerRemote extends Remote {
 
-    public String test() throws RemoteException;
-
     public long connect(IEventMessagesListener listener) throws RemoteException;
 
     public boolean disconnect(long id) throws RemoteException;

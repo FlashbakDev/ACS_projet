@@ -16,9 +16,10 @@ import rmi.EventMessagesListener;
 import rmi.IServerRemote;
 import rmi.Player;
 
-//Verifier pourquoi la croix marche pas sur l'affichage du texte
 /**
- *
+ * Classe qui gere les communications avec le rmi
+ * Crée et manage la vue
+ * Reçoit les evenements de l'ihm ou du serveur.
  * @author Benjamin
  */
 public class Client extends Application {

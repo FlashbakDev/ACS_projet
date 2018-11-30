@@ -12,7 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Classe communiquante rmi, le client utilise ses methodes pour les actions sur 
+ * le serveur. 
  * @author Benjamin
  * @version 1.1
  */
@@ -23,6 +24,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     private long ids;
 
     /**
+     * Initialise le manager d'evenement.
      * @since 1.0
      * @throws RemoteException
      */
@@ -37,33 +39,14 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         
     }
 
-    /**
-     * @since 0.1
-     * @throws RemoteException
-     */
-    @Override
-    public String test() throws RemoteException {
-
-        try {
-
-            String ip = getClientHost();
-            System.out.println("[" + ip + "] ServerRemote.test()");
-
-        } catch (ServerNotActiveException ex) {
-
-            Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return "Hello world !";
-    }
 
     /** 
      * Fonction qui s'execute à chaque connexion de client
      * Verifie dans la table des clients si le client qui se connecte est
      * nouveau ou ancien.
      *
-     * @param listener
-     * @return
+     * @param listener : la classe permettant la comunications du serveur au client
+     * @return L'id du client, si négative il y a eu une erreur
      * @throws java.rmi.RemoteException si le rmiregistry 'est inactif
      * @since 1.0
      */
