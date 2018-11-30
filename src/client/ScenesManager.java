@@ -1,12 +1,8 @@
 package client;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -26,7 +22,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import rmi.Bet;
 import rmi.Player;
 
 /**
@@ -47,12 +43,13 @@ public class ScenesManager {
     private final Client controller;
     private final Stage stage;
     private final Map<SceneTypes, Scene> scenes;
-    private TextArea textArea_eventMessages;
-    private ChoiceBox<Player> choiceBox_joueurs;
-    private ChoiceBox<String> choiceBox_pari;
+    private TextArea textArea_messages;
+    private ChoiceBox<Player> choiceBox_player;
+    private ChoiceBox<Bet> choiceBox_bet;
 
     private Button button_vote;
-    private Button button_pari;
+    private Button button_bet;
+    
     /**
      * Utile plus tard pour faire un clean plus propre de la scene précédente
      * lors d'un switch
@@ -64,13 +61,10 @@ public class ScenesManager {
     public ScenesManager(Client controller, Stage stage) {
 
         this.controller = controller;
-
         this.stage = stage;
-
         scenes = new HashMap<>();
 
         buildScenes();
-
     }
 
     /**
@@ -82,29 +76,28 @@ public class ScenesManager {
      */
     public void switchScene(SceneTypes sceneType) {
 
-        //Eventuellement faire un rebuild de la scene
-        if (sceneType == SceneTypes.EVENTS) {
-            Map<Player, Integer> players = controller.getPlayersList();
-            if (players != null && players.size() > 0) {
-                choiceBox_joueurs.setItems(FXCollections.observableList(new ArrayList<>(players.keySet())));
-            }
-
-            Set<String> pari = controller.getPariList();
-            if (pari != null && pari.size() > 0) {
-                choiceBox_pari.setItems(FXCollections.observableList(new ArrayList<>(pari)));
-            }
-
-        } else {
-            textArea_eventMessages.clear();
-        }
-
         stage.setTitle(sceneType.toString());
         stage.setScene(scenes.get(sceneType));
-
-        if (sceneType == SceneTypes.CONNECTION) {
-            stage.setResizable(false);
-        } else {
+        
+        if (sceneType == SceneTypes.EVENTS) {
+            
             stage.setResizable(true);
+            
+            textArea_messages.clear();
+            
+            List<Player> players = controller.getPlayersList();
+            if (players != null && players.size() > 0) {
+                choiceBox_player.setItems(FXCollections.observableList(players));
+            }
+
+            List<Bet> bet = controller.getPariList();
+            if (bet != null && bet.size() > 0) {
+                choiceBox_bet.setItems(FXCollections.observableList(bet));
+            }
+        }
+        else{
+            
+            stage.setResizable(false);
         }
 
         this.sceneType = sceneType;
@@ -131,19 +124,25 @@ public class ScenesManager {
      */
     public void addMessage(String message) {
 
-        ScrollBar scrollBar = (ScrollBar) textArea_eventMessages.lookup(".scroll-bar:vertical");
-        if (scrollBar == null) {
-            System.err.println("Erreur, scrollBar pas encore instancié (pour une raison ? )");
-            return;
+        ScrollBar scrollBar = (ScrollBar) textArea_messages.lookup(".scroll-bar:vertical");
+        
+        if( scrollBar != null ){
+            
+            if (scrollBar.valueProperty().get() == 1.0) {
+
+                textArea_messages.appendText(message + "\n");
+            
+            } else {
+
+                int caretPosition = textArea_messages.caretPositionProperty().get();
+                textArea_messages.appendText(message + "\n");
+                textArea_messages.positionCaret(caretPosition);
+            }
         }
-        if (scrollBar.valueProperty().get() == 1.0) {
-
-            textArea_eventMessages.appendText(message + "\n");
-        } else {
-
-            int caretPosition = textArea_eventMessages.caretPositionProperty().get();
-            textArea_eventMessages.appendText(message + "\n");
-            textArea_eventMessages.positionCaret(caretPosition);
+        else{
+            
+            System.out.println("client.ScenesManager.addMessage() : scrollBar = null !");
+            textArea_messages.appendText(message + "\n");
         }
     }
 
@@ -227,10 +226,10 @@ public class ScenesManager {
         text_title.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(text_title, 0, 0);
 
-        textArea_eventMessages = new TextArea();
-        textArea_eventMessages.setEditable(false);
-        textArea_eventMessages.setWrapText(true);
-        grid.add(textArea_eventMessages, 0, 1);
+        textArea_messages = new TextArea();
+        textArea_messages.setEditable(false);
+        textArea_messages.setWrapText(true);
+        grid.add(textArea_messages, 0, 1);
 
         Button button_disconnect = new Button();
         button_disconnect.setText("Déconnexion");
@@ -260,63 +259,40 @@ public class ScenesManager {
         grid_right.getRowConstraints().add(new RowConstraints());
         grid_right.getRowConstraints().add(new RowConstraints());
 
-        /** *Section Vote du joueur** */
         // grid_right content
-        choiceBox_joueurs = new ChoiceBox<>();
-        choiceBox_joueurs.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        grid_right.add(choiceBox_joueurs, 0, 1);
+        choiceBox_player = new ChoiceBox<>();
+        choiceBox_player.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid_right.add(choiceBox_player, 0, 1);
 
         button_vote = new Button();
         button_vote.setText("Voter");
         button_vote.setOnAction((ActionEvent event) -> {
 
-            controller.onClickOnButton_vote(choiceBox_joueurs.getValue());
+            controller.onClickOnButton_vote(choiceBox_player.getValue());
         });
         button_vote.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(button_vote, 1, 1);
-        button_vote.setDisable(true);
-        choiceBox_joueurs.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                System.out.println(choiceBox_joueurs.getItems().get((Integer) number2));
-                if(!finduMatch)
-                    button_vote.setDisable(false);
-            }
-        });
 
-        /** *Section pari** */
         // grid_right content
-        choiceBox_pari = new ChoiceBox<>();
-        choiceBox_pari.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        grid_right.add(choiceBox_pari, 0, 2);
+        choiceBox_bet = new ChoiceBox<>();
+        choiceBox_bet.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid_right.add(choiceBox_bet, 0, 2);
 
-        button_pari = new Button();
-        button_pari.setText("Parier");
-        button_pari.setOnAction((ActionEvent event) -> {
-            if (choiceBox_pari.getValue() != null) {
-                controller.onClickOnButton_pari(choiceBox_pari.getValue());
-            } else {
-                System.err.println("value null");
-            }
+        button_bet = new Button();
+        button_bet.setText("Parier");
+        button_bet.setOnAction((ActionEvent event) -> {
+            
+            controller.onClickOnButton_bet(choiceBox_bet.getValue());
         });
-        button_pari.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        grid_right.add(button_pari, 1, 2);
+        button_bet.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid_right.add(button_bet, 1, 2);
 
-        button_pari.setDisable(true);
-        choiceBox_pari.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
-                if(!finduMatch)
-                    button_pari.setDisable(false);
-            }
-        });
         // add scene
         scenes.put(SceneTypes.EVENTS, new Scene(grid, 950, 600));
     }
 
-    public void finduMatch() {
-        this.finduMatch = true;
-        button_pari.setDisable(true);
-        button_vote.setDisable(true);
+    public void EventEnd() {
+        
+        System.out.println("client.ScenesManager.EventEnd()");
     }
 }

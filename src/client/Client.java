@@ -2,16 +2,16 @@ package client;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import rmi.Bet;
 import rmi.ClientListener;
 import rmi.IServerRemote;
 import rmi.Player;
@@ -25,14 +25,15 @@ import rmi.Player;
 public class Client extends Application {
 
     private IServerRemote serverRemote;
-    private ScenesManager view;
     private ClientListener clientRemote;
+    
+    private ScenesManager view;
     private long id;
 
     @Override
     public void start(Stage primaryStage) {
 
-        id = 0;
+        id = -1;
         view = new ScenesManager(this, primaryStage);
         view.switchScene(ScenesManager.SceneTypes.CONNECTION);
     }
@@ -52,18 +53,17 @@ public class Client extends Application {
             clientRemote = new ClientListener(this);
             id = serverRemote.connect(clientRemote);
             
-            if(id <0){
+            if(id < 0){
                 
                 UnicastRemoteObject.unexportObject(clientRemote, true);
-                throw new NotBoundException("Erreur à la connexion");
             }
             
             view.switchScene(ScenesManager.SceneTypes.EVENTS);
 
-            List<String> passedlines = this.serverRemote.getEventHistory();
+            List<String> history = this.serverRemote.getEventHistory(id);
 
-            passedlines.forEach((passedline) -> {
-                this.view.addMessage(passedline);
+            history.forEach((passedline) -> { 
+                this.view.addMessage(passedline); 
             });
 
         } catch (NotBoundException | MalformedURLException | RemoteException ex) {
@@ -82,15 +82,15 @@ public class Client extends Application {
         try {
 
             serverRemote.disconnect(id);
-            //UnicastRemoteObject.unexportObject(clientRemote, true);
+            
             try{
                 
                 UnicastRemoteObject.unexportObject(clientRemote, true);
                 UnicastRemoteObject.unexportObject(serverRemote, true);
                 
-            }catch(java.rmi.NoSuchObjectException no){
+            }catch(NoSuchObjectException ex){
                 
-                System.err.println("erreur de deconnexion"); 
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex); 
             }
             
             id = 0;
@@ -106,7 +106,7 @@ public class Client extends Application {
      * Affiche tous ce qui est envoyer par le serveur
      * @param message : objet à afficher dans l'ihm
      */
-    public void onMessageReceived(String message) {
+    public void onEventMessageReceived(String message) {
 
         this.view.addMessage(message);
     }
@@ -115,8 +115,9 @@ public class Client extends Application {
      * Action activivé pas le listener pour 
      * mettre à jour l'indicateur de fin du match
      */
-    public void onFinDuMatch() {
-        this.view.finduMatch();
+    public void onEventEnd() {
+        
+        this.view.EventEnd();
     }
 
     /** 
@@ -139,13 +140,13 @@ public class Client extends Application {
     /** 
      * Action activé par les événements ihm
      * Envoie un pari au serveur
-     * @param j : Le resultat sur lequel l'utilisateur pari
+     * @param b
      */
-    public void onClickOnButton_pari(String j) {
+    public void onClickOnButton_bet(Bet b) {
 
         try {
 
-            serverRemote.bet(id, j);
+            serverRemote.bet(id, b);
 
         } catch (RemoteException ex) {
 
@@ -173,12 +174,12 @@ public class Client extends Application {
                 UnicastRemoteObject.unexportObject(clientRemote, true);
                 UnicastRemoteObject.unexportObject(serverRemote, true);
                 
-            }catch(java.rmi.NoSuchObjectException no){
+            }catch(NoSuchObjectException ex){
                 
                 //parfois les unexport leve une exception, des fois non. 
                 //Mais sa marche jamais si on les met pas
                 //Alors on capture et on se pose pas de question.
-                System.err.println("erreur de stop");
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -202,7 +203,7 @@ public class Client extends Application {
         
         try {
 
-            return serverRemote.getPlayersList();
+            return serverRemote.getPlayersList(id);
 
         } catch (RemoteException ex) {
 
@@ -216,11 +217,11 @@ public class Client extends Application {
      *
      * @return La liste des resultats pariables
      */
-    public List<String> getPariList() {
+    public List<Bet> getPariList() {
 
         try {
 
-            return serverRemote.getAvailableBets();
+            return serverRemote.getAvailableBets(id);
 
         } catch (RemoteException ex) {
 
@@ -239,7 +240,7 @@ public class Client extends Application {
 
         try {
             
-            return this.serverRemote.getEventHistory();
+            return this.serverRemote.getEventHistory(id);
             
         } catch (RemoteException ex) {
             

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,16 +28,13 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * @since 1.0
      * @throws RemoteException
      */
-    public ServerRemote() throws RemoteException, IOException{
+    public ServerRemote() throws RemoteException{
         super();
        
-        eventsManager = new EventsManager(this, "Events/test.txt");
+        eventsManager = new EventsManager(this);
         clients = new HashMap<>();
         ids = 0;
-
-        eventsManager.start();
     }
-
 
     /** 
      * Fonction qui s'execute à chaque connexion de client
@@ -46,8 +42,8 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * nouveau ou ancien.
      *
      * @param listener : la classe permettant la comunications du serveur au client
-     * @return L'id du client, si négative il y a eu une erreur
-     * @throws java.rmi.RemoteException si le rmiregistry 'est inactif
+     * @return L'id du client, -1 si erreur
+     * @throws java.rmi.RemoteException si le rmiregistry est inactif
      * @since 1.0
      */
     @Override
@@ -56,25 +52,22 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         try {
 
             String ip = getClientHost();
-
-            System.out.println("[" + ip + "]ServerRemote.connect()");
+            log( null, "Connection from "+ ip+"...");
 
             // already exists
             for (Map.Entry<Long, ClientInst> entry : clients.entrySet()) {
 
+                // check ip
                 if (entry.getValue().getIp().equals(ip)) {
 
                     if (!entry.getValue().connected) {
 
-                        System.out.println("[" + ip + "] reconnected");
-
                         entry.getValue().connected = true;
                         entry.getValue().listener = listener;
 
+                        log(entry.getValue(), "Reconnected.");
                         return entry.getValue().getId();
-                    }else{
-                        System.out.println("[" + ip + "] already connected");
-                        return -2;
+                        
                     }
                 }
             }
@@ -83,7 +76,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
             ClientInst client = new ClientInst(getNextId(), ip, listener);
             clients.put(client.getId(), client);
 
-            System.out.println("[" + ip + "] connected");
+            log(client, "Connected.");
 
             return client.getId();
 
@@ -92,6 +85,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
             Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        // Error
         return -1;
     }
 
@@ -107,35 +101,27 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     @Override
     public boolean disconnect(long id) throws RemoteException {
 
-        try {
+        ClientInst client = clients.get(id);
 
-            String ip = getClientHost();
+        log( client, "Disconnect...");
 
-            System.out.println("[" + ip + "] ServerRemote.disconnect()");
+        if (clients.containsKey(id)) {
 
-            if (clients.containsKey(id)) {
+            clients.get(id).connected = false;
+            clients.get(id).listener = null;
 
-                clients.get(id).connected = false;
-                clients.get(id).listener = null;
-
-                System.out.println("[" + ip + "] disconnected");
-                return true;
-            }
-
-        } catch (ServerNotActiveException ex) {
-
-            Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
+            log( client, "Disconnected.");
+            return true;
         }
 
         return false;
     }
 
-    //peut etre synchronized ?
     /**
      * Incremente les id des clients
      * @since 1.0
      */
-    private long getNextId() {
+    synchronized private long getNextId() {
 
         ids++;
         return ids;
@@ -146,7 +132,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * @param message : Le message à envoyer aux clients
      * @since 1.0
      */
-    public void notifyListeners(String message) {
+    public void sendEventMessage(String message) {
         
         clients.entrySet().forEach((entry) -> {
 
@@ -172,11 +158,12 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * S'active à la fin d'un match. Avertie les clients de l'arret du match
      * Envoie aux clients concerné les infos sur les reussites aux pari ou vote
      * 
-     * @param joueurs : La map des joueurs ex aequo ayant eu le plus de vote
-     * @param resulat : Le resultat du match
+     * @param playerVotes : La map des joueurs / nombre de votes
+     * @param result : Le resultat du match
      * @since 1.0
      */
-    public void finDuMatch(String resulat, Map<Player, Integer> joueurs){
+    public void sendEventEnded(Bet result, Map<Player, Integer> playerVotes){
+        
          clients.entrySet().forEach((entry) -> {
 
             if (entry.getValue().connected) {
@@ -184,12 +171,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
                 try {
                     
                     entry.getValue().listener.EventEnd();
-                    if(entry.getValue().pari.equals(resulat)){
-                        entry.getValue().listener.EventGoodBet();
-                    }
-                    if(joueurs.containsKey(entry.getValue().vote)){
-                        entry.getValue().listener.EventGoodVote();
-                    }
+                    
                 } catch (RemoteException|NullPointerException  ex) {
 
                     Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
@@ -202,16 +184,40 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         });
     }
 
+    private void log(ClientInst c, String s){
+        
+        if(c != null)
+            System.out.println("[" + c.toString() + "] "+ s);
+        else
+            System.out.println(s);
+    }
+    
+    public void startEvent(String eventFileName){
+        
+        try {
+            
+            eventsManager.startEvent(eventFileName);
+            
+        } catch (IOException ex) {
+            
+            Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    //==========================================================================
+    // IServerRemote
+    //==========================================================================
+    
     @Override
-    public Set<Player> getPlayersList(long id) throws RemoteException{
+    public List<Player> getPlayersList(long id) throws RemoteException{
         
         log(this.clients.get(id),"Retrieve players list.");
         
-        return eventsManager.getPlayersVotes().keySet();
+        return new ArrayList<>(eventsManager.getPlayersVotes().keySet());
     }
     
     @Override
-    public Set<String> getAvailableBets(long id) throws RemoteException{
+    public List<Bet> getAvailableBets(long id) throws RemoteException{
        
         log(this.clients.get(id),"Retrieve available bet.");
         
@@ -241,7 +247,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
     }
     
     @Override
-    public boolean bet(long id, String b) throws RemoteException{
+    public boolean bet(long id, Bet b) throws RemoteException{
         
         if(b == null)
             return false;
@@ -266,10 +272,5 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         log(this.clients.get(id),"Retrieve event history.");
         
         return this.eventsManager.getHistory();
-    }
-    
-    private void log(ClientInst c, String s){
-        
-        System.out.println("[" + c.toString() + "] "+ s);
     }
 }

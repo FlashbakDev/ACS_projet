@@ -17,7 +17,7 @@ public class ClientInst {
     /**Le joueur pour qui le client à voter.*/
     public Player vote = null; 
     /**Le pari sur le resultat du client*/
-    public String pari = null;
+    public Bet pari = null;
 
     /**
      * Constructeur de ClientInst

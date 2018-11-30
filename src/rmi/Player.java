@@ -8,40 +8,42 @@ package rmi;
 import java.io.Serializable;
 
 /**
- *
- * @author jerem
  * Identifie un joueur
+ * @author jerem
  * @version 1.0
  */
 public class Player implements Serializable{
-    /**Le nom du joueur, sert egalement à l'indentifier
+    
+    /**
+     * Le nom du joueur, sert egalement à l'indentifier
      * @since 1.0     
      */
-    private String nom;
+    private String name;
     
-    /**Constructeur
+    /**
+     * Constructeur
      * @param nom : Le nom du joueur
      * @since 1.0
      */
     public Player(String nom){
-        this.nom = nom;
+        
+        this.name = nom;
     }
     
     @Override
-    /**Affiche le nom du joueur
+    /**
+     * Affiche le nom du joueur
      * @return : Le nom du joueur
      * @since 1.0
      */
     public String toString(){
-        return this.nom;
         
+        return this.name;
     }
     
     @Override
-    /*On redefini le equals pour utiliser les Set<>*/
     /**
-     * 
-     * Compare le nom du Joueur
+     * On redefini le equals pour utiliser les Set<>
      * @since 1.0
      */
     public boolean equals(Object obj) {
@@ -49,13 +51,12 @@ public class Player implements Serializable{
         if(!(obj instanceof Player))
             return false;
         
-        return this.nom.equals(((Player)(obj)).nom);
+        return this.name.equals(((Player)(obj)).name);
     }
     
     @Override
-    //On redefini pour le equals
     public int hashCode() {
         
-        return this.nom.hashCode();
+        return this.name.hashCode();
     }
 }

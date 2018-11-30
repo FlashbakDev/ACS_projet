@@ -6,11 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,161 +23,157 @@ import java.util.logging.Logger;
 public class EventsManager extends Thread {
 
     /**Le gestionnaire de vitesse pour les evenements*/
-    private static final float timeSpeed = 1.0f; // 1 min = 1 seconde
+    private static final float TIMESPEED = 1.0f; // 1 min = 1 seconde
+    
     /**L'instance RMI*/
     private final ServerRemote serverRemote;
+    
     /**Une liste de toute les lignes de texte du fichier d'evenement*/
     private List<String> lines;
+    
     /**Une liste de tout les messages envoyé aux clients*/
-    private List<String> passedLines;
+    private List<String> history;
+    
     /**La liste des joueurs ainsi que leur nombre de votes*/
-    private Map<Player, Integer> playersVotes;
-    /**Indique si un match est en cour ou non*/
-    private boolean isEventRuning = false; //Sert pour autoriser les votes/pari
+    private Map<Player, Integer> votes;
+    
     /**La liste des options de pari*/
-    private Set<String> pari_equipe;
-    /**L'option gagnante des pari. Pas necessairement inclu dans pari_equipe*/
-    private String gagnant;
+    private List<Bet> validBets;
+    
+    /**L'option gagnante des pari*/
+    private Bet result;
+    
+    /**Indique si un match est en cour ou non*/
+    private boolean isEventRuning;
 
     /**
      * Constructeur, il initialise les attributs, et recupere l'intégralité 
-     * du fichier texte. (On pourrait surement economiser de la Ram en lisant le fichier à la volé ... )
+     * du fichier texte. (On pourrait surement economiser de la Ram en lisant le
+     * fichier à la volé ... )
      * @param contract : L'instance rmi
-     * @param fileName : Le nom du fichier à lire
      * @since 1.0
-     * @throws IOException Si le fichier n'est pas valide.
      */
-    public EventsManager(ServerRemote contract, String fileName) throws IOException{
+    public EventsManager(ServerRemote contract){
 
         this.serverRemote = contract;
-        lines = new ArrayList<>();
-        passedLines = new ArrayList<>();
-
-        this.playersVotes = new HashMap<Player, Integer>();
-        this.pari_equipe = new HashSet<String>();
-
-       
-        lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
-
+        resetEvent();
+    }
+    
+    private void resetEvent(){
         
+        lines = new ArrayList<>();
+        history = new ArrayList<>();
+        this.votes = new HashMap<>();
+        this.validBets = new ArrayList<>();
+        
+        result = null;
+        isEventRuning = false;
     }
 
+    public void startEvent(String fileName) throws IOException{
+        
+        resetEvent();
+        lines = Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8);
+        
+        ListIterator<String> itr = lines.listIterator();
+        
+        this.initValidBets(itr.next());
+        this.initPlayers(itr.next()); 
+        
+        start();
+    }
+
+    /**
+     * Les noms des paris commencent au : et sont separé par une virgule.
+     * @param s
+     * @since 1.1
+     */
+    public void initValidBets(String s) {
+        
+        String[] bets = s.split(":")[1].split(",");
+
+        for (String bet : bets) {
+            
+            validBets.add(new Bet(bet));
+        }
+        
+        result = validBets.get(0);
+    }
+    
+    /**
+     * Les noms des joueurs commencent au : et sont separé par une virgule.
+     * @param s : String contenant ':' suivit d'une liste de nom séparé par des
+     *          ','
+     * @since 1.1
+     */
+    public void initPlayers(String s) {
+
+        String[] names = s.split(":")[1].split(",");
+
+        for (String name : names) {
+            votes.put(new Player(name), 0);
+        }
+    }
+    
     /**
      * @since 1.0
      */
     @Override
     public void run() {
 
-        ListIterator<String> itr = lines.listIterator(lines.size());
         int time = 0;
-
-        String ligne = itr.previous();
-        this.initPariPossible(ligne);
-        ligne = itr.previous();
-        this.gagnant = ligne.split(":")[1];
-        ligne = itr.previous();
-        this.initListJoueur(ligne); //La premiere ligne est envoyé à l'initialisateur de joueurs
+        ListIterator<String> itr = lines.listIterator();
         this.isEventRuning = true;
-        while (itr.hasPrevious()) {
+        
+        while (itr.hasNext()) {
 
             try {
-                ligne = itr.previous();
+                
+                String line = itr.next();
 
-                //Supprime un eventuelle premier caractere d'UTF. Necessaire pour la premiere ligne du fichier.
-                if (Character.isIdentifierIgnorable(ligne.charAt(0))) {
-                    ligne = ligne.substring(1);
+                //Supprime un eventuelle premier caractere d'UTF.
+                if (Character.isIdentifierIgnorable(line.charAt(0))) {
+                    
+                    line = line.substring(1);
                 }
 
-                int nextTime = Integer.parseInt(ligne.split(" ")[0]);
+                int nextTime = Integer.parseInt(line.split(" ")[0]);
                 int waitTime = nextTime - time;
 
-                ligne = ligne.substring(ligne.split(" ")[0].length() + 1);
-                ligne = "[" + nextTime + ":00]" + ligne;
-                //System.out.println("time = "+ time +", next time = "+ nextTime + ", waitTime = "+ waitTime +", "+ (long)((waitTime*60000)*timeSpeed));
-                sleep((long) ((waitTime * 1000) * timeSpeed));
+                line = line.substring(line.split(" ")[0].length() + 1);
+                line = "[" + nextTime + ":00]" + line;
+                
+                sleep((long) ((waitTime * 1000) * TIMESPEED));
 
                 time += waitTime;
-                serverRemote.notifyListeners(ligne);
-                passedLines.add(ligne);
+                
+                serverRemote.sendEventMessage(line);
+                lines.remove(line);
+                history.add(line);
 
-            } catch (InterruptedException ex) {
+            } catch (InterruptedException | NumberFormatException ex) {
 
-                Logger.getLogger(EventsManager.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NumberFormatException ex) {
                 Logger.getLogger(EventsManager.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         }
+        
+        serverRemote.sendEventEnded(this.result, votes);
         this.isEventRuning = false;
-        Map<Player, Integer> joueurs_elu = this.getName_joueur_voté();
-        serverRemote.finDuMatch(this.gagnant, joueurs_elu);
-        ligne = "Le(s) joueur(s) ayant obtenu le plus de vote est/sont : " + joueurs_elu;
-        serverRemote.notifyListeners(ligne);
-        passedLines.add(ligne);
-
     }
 
     /**
-     * @param s : String contenant ':' suivit d'une liste de nom séparé par des
-     *          ','
-     * @since 1.1
-     */
-    public void initListJoueur(String s) {
-
-        String[] names_joueurs = s.split(":")[1].split(","); //Les noms des joueurs commencent au : et sont separé par une virgule.
-
-        for (String names_joueur : names_joueurs) {
-            playersVotes.put(new Player(names_joueur), 0);
-        }
-    }
-
-    /**
-     * @since 1.1
-     */
-    public void initPariPossible(String s) {
-        String[] names_resultat = s.split(":")[1].split(","); //Les noms des joueurs commencent au : et sont separé par une virgule.
-
-        for (String name_resultat : names_resultat) {
-            pari_equipe.add(name_resultat);
-        }
-    }
-
-    /**
-     * @since 1.2
-     */
-    private Map<Player, Integer> getName_joueur_voté() {
-
-        Map.Entry<Player, Integer> maxEntry = null;
-        Map<Player, Integer> liste_j = new HashMap();
-
-        for (Map.Entry<Player, Integer> entry : playersVotes.entrySet()) {
-            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
-                maxEntry = entry;
-                liste_j.clear();
-                liste_j.put(entry.getKey(), entry.getValue());
-            } else if (entry.getValue().compareTo(maxEntry.getValue()) == 0) {
-                liste_j.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return liste_j;
-
-    }
-
-    /**
+     * @return 
      * @since 1.0
      */
-    public List<String> getHistory() {
-        return passedLines;
-    }
+    public List<String> getHistory() { return history; }
 
     public boolean vote(Player j) {
 
         if (j != null && this.isEventRuning) {
 
-            if (this.playersVotes.containsKey(j)) {
+            if (this.votes.containsKey(j)) {
 
-                this.playersVotes.replace(j, this.playersVotes.get(j), this.playersVotes.get(j) + 1);
+                this.votes.replace(j, this.votes.get(j), this.votes.get(j) + 1);
                 return true;
             }
         }
@@ -189,14 +183,16 @@ public class EventsManager extends Thread {
 
     /**
      * Supprime le vote pour un joueur
+     * @param j
+     * @return 
      */
     public boolean unvote(Player j) {
 
         if (j != null && this.isEventRuning) {
 
-            if (this.playersVotes.containsKey(j)) {
+            if (this.votes.containsKey(j)) {
 
-                this.playersVotes.replace(j, this.playersVotes.get(j), this.playersVotes.get(j) - 1);
+                this.votes.replace(j, this.votes.get(j), this.votes.get(j) - 1);
                 return true;
             }
         }
@@ -204,16 +200,9 @@ public class EventsManager extends Thread {
         return false;
     }
 
-    public Map<Player, Integer> getPlayersVotes() {
-        return this.playersVotes;
-    }
+    public Map<Player, Integer> getPlayersVotes() { return this.votes;}
 
-    public Set<String> getAvailableBets() {
-        return this.pari_equipe;
-    }
+    public List<Bet> getAvailableBets() {return this.validBets;}
 
-    public boolean getIsEventRunning() {
-        return this.isEventRuning;
-    }
-;
+    public boolean getIsEventRunning() {return this.isEventRuning;}
 }

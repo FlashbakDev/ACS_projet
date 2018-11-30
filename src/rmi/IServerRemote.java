@@ -20,14 +20,14 @@ public interface IServerRemote extends Remote {
      * @throws java.rmi.RemoteException
      * @since 1.1
      */
-    public Set<Player> getPlayersList(long id) throws RemoteException;
+    public List<Player> getPlayersList(long id) throws RemoteException;
 
     /**
      * @return la List de joueurs unique sur le serveur
      * @throws java.rmi.RemoteException
      * @since 1.1
      */
-    public Set<String> getAvailableBets(long id) throws RemoteException;
+    public List<Bet> getAvailableBets(long id) throws RemoteException;
     
     /**
      * Un vote est pris en compte uniquement si le match n'est pas terminé
@@ -45,7 +45,7 @@ public interface IServerRemote extends Remote {
      * @return : indicateur de validité du pari.
      * @throws RemoteException
      */
-    public boolean bet(long id, String b) throws RemoteException;
+    public boolean bet(long id, Bet b) throws RemoteException;
     
     public List<String> getEventHistory(long id)throws RemoteException;
 }
