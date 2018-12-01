@@ -77,11 +77,11 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
      * S'active à la fin d'un match. Avertie les clients de l'arret du match
      * Envoie aux clients concerné les infos sur les reussites aux pari ou vote
      * 
-     * @param playerVotes : La map des joueurs / nombre de votes
+     * @param votes : La map des joueurs / nombre de votes
      * @param result : Le resultat du match
      * @since 1.0
      */
-    public void sendEventEnded(Bet result, Map<Player, Integer> playerVotes){
+    public void sendEventEnded(Bet result, Map<Player, Integer> votes){
         
          clients.entrySet().forEach((entry) -> {
 
@@ -89,7 +89,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
 
                 try {
                     
-                    entry.getValue().listener.EventEnd();
+                    entry.getValue().listener.EventEnd(entry.getValue().bet, result, votes);
                     
                 } catch (RemoteException|NullPointerException  ex) {
 

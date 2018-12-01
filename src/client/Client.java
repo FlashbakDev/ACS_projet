@@ -7,6 +7,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -122,8 +123,28 @@ public class Client extends Application {
     /**
      * Action activivé pas le listener pour 
      * mettre à jour l'indicateur de fin du match
+     * @param clientBet
+     * @param result
+     * @param votes
      */
-    public void onEventEnd() {
+    public void onEventEnd(Bet clientBet, Bet result, Map<Player, Integer> votes) {
+        
+        if(result.equals(clientBet)){
+            
+            view.addLog("Félicitaion, votre paris étais juste ! "+ result);
+        }
+        else{
+            
+            view.addLog("Vous n'avez pas réussis à parier sur le bon résultat : "+ result);
+        }
+        
+        view.addLog("Voici la liste des votes :");
+        votes.entrySet().forEach((entry) -> {
+        
+            view.addLog(entry.getKey().toString()+" : "+entry.getValue()+" votes.");
+        });
+        
+        view.addLog("Evenement terminé.");
         
         this.view.EventEnd();
     }

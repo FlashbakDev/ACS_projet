@@ -3,6 +3,7 @@ package rmi;
 import client.Client;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Map;
 
 /**
  * @author Benjamin
@@ -24,9 +25,9 @@ public class ClientListener extends UnicastRemoteObject implements IClientListen
     }
     
     @Override
-    public void EventEnd() throws RemoteException {
+    public void EventEnd(Bet clientBet, Bet result, Map<Player, Integer> votes) throws RemoteException {
 
-        client.onEventEnd();
+        client.onEventEnd(clientBet, result, votes);
     }
     
     @Override

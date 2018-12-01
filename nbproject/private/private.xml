@@ -3,15 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Users/jerem/OneDrive/Documents/ACS_projet/src/rmi/ServerRemote.java</file>
-            <file>file:/D:/Users/jerem/OneDrive/Documents/ACS_projet/src/rmi/IEventMessagesListener.java</file>
-            <file>file:/D:/Users/jerem/OneDrive/Documents/ACS_projet/src/server/Server.java</file>
-            <file>file:/D:/Users/jerem/OneDrive/Documents/ACS_projet/src/rmi/EventMessagesListener.java</file>
-            <file>file:/D:/Users/jerem/OneDrive/Documents/ACS_projet/src/rmi/ClientInst.java</file>
-            <file>file:/D:/Users/jerem/OneDrive/Documents/ACS_projet/src/client/ScenesManager.java</file>
-            <file>file:/D:/Users/jerem/OneDrive/Documents/ACS_projet/src/rmi/EventsManager.java</file>
-            <file>file:/D:/Users/jerem/OneDrive/Documents/ACS_projet/src/client/Client.java</file>
-            <file>file:/D:/Users/jerem/OneDrive/Documents/ACS_projet/src/rmi/IServerRemote.java</file>
+            <file>file:/E:/Java/ACS/ACS_projet/src/rmi/ClientInst.java</file>
+            <file>file:/E:/Java/ACS/ACS_projet/src/client/ScenesManager.java</file>
+            <file>file:/E:/Java/ACS/ACS_projet/src/rmi/EventsManager.java</file>
+            <file>file:/E:/Java/ACS/ACS_projet/src/client/Client.java</file>
+            <file>file:/E:/Java/ACS/ACS_projet/src/rmi/ServerRemote.java</file>
+            <file>file:/E:/Java/ACS/ACS_projet/src/rmi/IServerRemote.java</file>
+            <file>file:/E:/Java/ACS/ACS_projet/src/rmi/ClientListener.java</file>
+            <file>file:/E:/Java/ACS/ACS_projet/src/server/Server.java</file>
+            <file>file:/E:/Java/ACS/ACS_projet/src/rmi/IClientListener.java</file>
         </group>
     </open-files>
 </project-private>
