@@ -45,6 +45,8 @@ public class EventsManager extends Thread {
     
     /**Indique si un match est en cour ou non*/
     private boolean isEventRuning;
+    
+    private boolean stopEvent;
 
     /**
      * Constructeur, il initialise les attributs, et recupere l'intégralité 
@@ -68,6 +70,7 @@ public class EventsManager extends Thread {
         
         result = null;
         isEventRuning = false;
+        stopEvent = false;
     }
 
     public void startEvent(String fileName) throws IOException{
@@ -80,7 +83,31 @@ public class EventsManager extends Thread {
         this.initPlayers(lines.get(0)); 
         lines.remove(0);
         
+        System.out.println("Events "+ fileName + " started.");
+        
         start();
+    }
+    
+    public void stopEvent(){
+        
+        if(isEventRuning){
+            
+            stopEvent = true;
+            
+            System.out.println("Events stop...");
+            
+            try {
+                join();
+                
+            } catch (InterruptedException ex) {
+                
+                Logger.getLogger(EventsManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            resetEvent();
+            
+            System.out.println("Events stoped.");
+        }
     }
 
     /**
@@ -127,6 +154,12 @@ public class EventsManager extends Thread {
         
         while (itr.hasNext()) {
 
+            if(stopEvent){
+                
+                isEventRuning = false;
+                return;
+            }
+            
             try {
                 
                 String line = itr.next();
@@ -147,6 +180,7 @@ public class EventsManager extends Thread {
 
                 time += waitTime;
                 
+                System.out.println(line);
                 serverRemote.sendEventMessage(line);
                 history.add(line);
 

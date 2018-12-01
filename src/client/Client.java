@@ -56,26 +56,34 @@ public class Client extends Application {
             if(id < 0){
                 
                 UnicastRemoteObject.unexportObject(clientRemote, true);
+                
+                if(id == -2)
+                    view.setLabel_error("Il n'y a pas d'évènement en cours sur ce serveur.");
+                else
+                    view.setLabel_error("Il y a eu une erreur inattendue.");
             }
+            else{
             
-            view.switchScene(ScenesManager.SceneTypes.EVENTS);
+                view.switchScene(ScenesManager.SceneTypes.EVENTS);
 
-            List<String> history = this.serverRemote.getEventHistory(id);
+                List<String> history = this.serverRemote.getEventHistory(id);
 
-            history.forEach((passedline) -> {
-                this.view.addMessage(passedline); 
-            });
+                history.forEach((passedline) -> {
+                    this.view.addMessage(passedline); 
+                });
+            }
 
         } catch (NotBoundException | MalformedURLException | RemoteException ex) {
 
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             view.switchScene(ScenesManager.SceneTypes.CONNECTION);
+            
+            view.setLabel_error("Erreur, impossible de se connecter."+System.lineSeparator()+"Veuiller vérifier l'adresse et l'état du serveur.");
         }
     }
 
     /**
      * Ferme la connexion 
-     *      
      */
     public void onClickOnButton_disconnect() {
 
@@ -93,7 +101,7 @@ public class Client extends Application {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex); 
             }
             
-            id = 0;
+            id = -1;
             view.switchScene(ScenesManager.SceneTypes.CONNECTION);
 
         } catch (RemoteException ex) {
@@ -124,34 +132,45 @@ public class Client extends Application {
      * Action activé par les événements ihm
      * Envoie un vote au serveur
      * @param j : Le joueur pour qui l'utilisateur vote
+     * @return 
      */
-    public void onClickOnButton_vote(Player j) {
+    synchronized public boolean onClickOnButton_vote(Player j) {
 
         try {
 
-            serverRemote.vote(id, j);
+            return serverRemote.vote(id, j);
             
         } catch (RemoteException ex) {
 
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        return false;
     }
 
     /** 
      * Action activé par les événements ihm
      * Envoie un pari au serveur
      * @param b
+     * @return 
      */
-    public void onClickOnButton_bet(Bet b) {
+    synchronized public boolean onClickOnButton_bet(Bet b) {
 
         try {
 
-            serverRemote.bet(id, b);
+            return serverRemote.bet(id, b);
 
         } catch (RemoteException ex) {
 
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        return false;
+    }
+    
+    synchronized public void onKickedByServer(String message){
+        
+        view.addMessage(message);
     }
 
     /**
@@ -163,18 +182,14 @@ public class Client extends Application {
     public void stop() throws Exception {
         super.stop();
 
-        System.out.println("client.Client.stop()");
-
         if (id > 0) {
 
-            serverRemote.disconnect(id);
-            
-            try{
+            try {
                 
+                serverRemote.disconnect(id);
                 UnicastRemoteObject.unexportObject(clientRemote, true);
-                //UnicastRemoteObject.unexportObject(serverRemote, true);
                 
-            }catch(NoSuchObjectException ex){
+            } catch (RemoteException ex) {
                 
                 //parfois les unexport leve une exception, des fois non. 
                 //Mais sa marche jamais si on les met pas
@@ -241,6 +256,34 @@ public class Client extends Application {
         try {
             
             return this.serverRemote.getEventHistory(id);
+            
+        } catch (RemoteException ex) {
+            
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return null;
+    }
+    
+    public Player getVote(){
+        
+        try {
+            
+            return this.serverRemote.getVote(id);
+            
+        } catch (RemoteException ex) {
+            
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return null;
+    }
+    
+    public Bet getBet(){
+        
+        try {
+            
+            return this.serverRemote.getBet(id);
             
         } catch (RemoteException ex) {
             

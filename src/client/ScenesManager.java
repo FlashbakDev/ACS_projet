@@ -1,5 +1,7 @@
 package client;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +20,11 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import rmi.Bet;
 import rmi.Player;
@@ -46,10 +50,12 @@ public class ScenesManager {
     private TextArea textArea_messages;
     private ChoiceBox<Player> choiceBox_player;
     private ChoiceBox<Bet> choiceBox_bet;
-
+    private TextArea textArea_log;
+    private Label label_error;
     private Button button_vote;
     private Button button_bet;
-    
+    private SimpleDateFormat format = new SimpleDateFormat("hh:mm:ss");
+ 
     /**
      * Utile plus tard pour faire un clean plus propre de la scene précédente
      * lors d'un switch
@@ -74,29 +80,35 @@ public class ScenesManager {
      * @param sceneType scene to switch to
      * @since 1.0
      */
-    public void switchScene(SceneTypes sceneType) {
+    synchronized public void switchScene(SceneTypes sceneType) {
 
-        stage.setTitle(sceneType.toString());
+        //stage.setTitle(sceneType.toString());
         stage.setScene(scenes.get(sceneType));
         
         if (sceneType == SceneTypes.EVENTS) {
             
             stage.setResizable(true);
             
+            textArea_log.clear();
             textArea_messages.clear();
             
             List<Player> players = controller.getPlayersList();
             if (players != null && players.size() > 0) {
                 choiceBox_player.setItems(FXCollections.observableList(players));
             }
+            choiceBox_player.setValue(controller.getVote());
 
             List<Bet> bet = controller.getPariList();
             if (bet != null && bet.size() > 0) {
                 choiceBox_bet.setItems(FXCollections.observableList(bet));
             }
+            choiceBox_bet.setValue(controller.getBet());
+            
+            addLog("Bienvenue ! ci-dessus vous pouvez parier et voter pour le meilleur joueur !");
         }
         else{
             
+            label_error.setText("");
             stage.setResizable(false);
         }
 
@@ -153,6 +165,21 @@ public class ScenesManager {
             System.out.println("client.ScenesManager.addMessage() : exception = "+ ex);
         }
     }
+    
+    public void setLabel_error(String error){
+        
+        if(sceneType == sceneType.CONNECTION)
+            label_error.setText(error);
+        else if(sceneType == sceneType.EVENTS)
+            addLog(error);
+    }
+    
+    synchronized public void addLog(String log){
+        
+        Date curDate = new Date();
+
+        textArea_log.appendText("["+format.format(curDate)+"] "+log+"\n");
+    }
 
     /**
      * Build the Connectioin scene.
@@ -168,7 +195,8 @@ public class ScenesManager {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 50, 25));
 
-        // 3 rows
+        // 4 rows
+        grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
         grid.getRowConstraints().add(new RowConstraints());
@@ -197,8 +225,15 @@ public class ScenesManager {
         button_connect.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid.add(button_connect, 0, 2, 2, 1);
 
+        label_error = new Label("");
+        label_error.setTextFill(Color.web("#FF0000"));
+        label_error.textAlignmentProperty().set(TextAlignment.CENTER);
+        label_error.setWrapText(true);
+        label_error.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid.add(label_error, 0, 3, 2, 1);
+        
         // adds scene
-        scenes.put(SceneTypes.CONNECTION, new Scene(grid, 350, 150));
+        scenes.put(SceneTypes.CONNECTION, new Scene(grid, 350, 180));
     }
 
     /**
@@ -267,6 +302,8 @@ public class ScenesManager {
         grid_right.getRowConstraints().add(new RowConstraints());
         grid_right.getRowConstraints().add(new RowConstraints());
 
+        grid.getRowConstraints().get(2).setVgrow(Priority.ALWAYS);
+        
         // grid_right content
         choiceBox_player = new ChoiceBox<>();
         choiceBox_player.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -276,7 +313,13 @@ public class ScenesManager {
         button_vote.setText("Voter");
         button_vote.setOnAction((ActionEvent event) -> {
 
-            controller.onClickOnButton_vote(choiceBox_player.getValue());
+            synchronized(textArea_log){
+                
+                if(controller.onClickOnButton_vote(choiceBox_player.getValue())){
+
+                    addLog("Vous avez voté pour "+ choiceBox_player.getValue());
+                }
+            }
         });
         button_vote.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(button_vote, 1, 1);
@@ -290,11 +333,23 @@ public class ScenesManager {
         button_bet.setText("Parier");
         button_bet.setOnAction((ActionEvent event) -> {
             
-            controller.onClickOnButton_bet(choiceBox_bet.getValue());
+            synchronized(textArea_log){
+            
+                if(controller.onClickOnButton_bet(choiceBox_bet.getValue())){
+
+                    addLog("Vous avez parié pour "+ choiceBox_bet.getValue());
+                }
+            }
         });
         button_bet.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         grid_right.add(button_bet, 1, 2);
 
+        textArea_log = new TextArea();
+        textArea_log.setEditable(false);
+        textArea_log.setWrapText(true);
+        textArea_log.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        grid_right.add(textArea_log, 0, 3, 2, 1);
+        
         // add scene
         scenes.put(SceneTypes.EVENTS, new Scene(grid, 950, 600));
     }

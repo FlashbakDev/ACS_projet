@@ -36,87 +36,6 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         ids = 0;
     }
 
-    /** 
-     * Fonction qui s'execute à chaque connexion de client
-     * Verifie dans la table des clients si le client qui se connecte est
-     * nouveau ou ancien.
-     *
-     * @param listener : la classe permettant la comunications du serveur au client
-     * @return L'id du client, -1 si erreur
-     * @throws java.rmi.RemoteException si le rmiregistry est inactif
-     * @since 1.0
-     */
-    @Override
-    public long connect(IClientListener listener) throws RemoteException {
-
-        try {
-
-            String ip = getClientHost();
-            log( null, "Connection from "+ ip+"...");
-
-            // already exists
-            for (Map.Entry<Long, ClientInst> entry : clients.entrySet()) {
-
-                // check ip
-                if (entry.getValue().getIp().equals(ip)) {
-
-                    if (!entry.getValue().connected) {
-
-                        entry.getValue().connected = true;
-                        entry.getValue().listener = listener;
-
-                        log(entry.getValue(), "Reconnected.");
-                        return entry.getValue().getId();
-                        
-                    }
-                }
-            }
-
-            // add new
-            ClientInst client = new ClientInst(getNextId(), ip, listener);
-            clients.put(client.getId(), client);
-
-            log(client, "Connected.");
-
-            return client.getId();
-
-        } catch (ServerNotActiveException ex) {
-
-            Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // Error
-        return -1;
-    }
-
-    /**
-     * Fonction qui deconnecte un client
-     * Ne le supprime pas des listes de clients
-     * @param id : L'id du client à deconnecté
-     * @return indication de deconnexion du client
-     * @throws RemoteException
-     * @since 1.0
-     *
-     */
-    @Override
-    public boolean disconnect(long id) throws RemoteException {
-
-        ClientInst client = clients.get(id);
-
-        log( client, "Disconnect...");
-
-        if (clients.containsKey(id)) {
-
-            clients.get(id).connected = false;
-            clients.get(id).listener = null;
-
-            log( client, "Disconnected.");
-            return true;
-        }
-
-        return false;
-    }
-
     /**
      * Incremente les id des clients
      * @since 1.0
@@ -204,9 +123,120 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         }
     }
     
+    public void stopEvent(){
+        
+        eventsManager.stopEvent();
+        
+        clients.entrySet().forEach((entry) -> {
+
+            if (entry.getValue().connected) {
+
+                try {
+                    
+                    entry.getValue().listener.Kick("Le serveur à été fermé.");
+                    
+                } catch (RemoteException ex) {
+                    
+                    Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                entry.getValue().connected = false;
+                entry.getValue().listener = null;
+            }
+        });
+    }
+    
+    public void quit(){
+        
+        stopEvent();
+    }
+    
     //==========================================================================
     // IServerRemote
     //==========================================================================
+    
+        /** 
+     * Fonction qui s'execute à chaque connexion de client
+     * Verifie dans la table des clients si le client qui se connecte est
+     * nouveau ou ancien.
+     *
+     * @param listener : la classe permettant la comunications du serveur au client
+     * @return L'id du client, -1 si erreur
+     * @throws java.rmi.RemoteException si le rmiregistry est inactif
+     * @since 1.0
+     */
+    @Override
+    public long connect(IClientListener listener) throws RemoteException {
+
+        if(!eventsManager.getIsEventRunning())
+            return -2;
+        
+        try {
+
+            String ip = getClientHost();
+            log( null, "Connection from "+ ip+"...");
+
+            // already exists
+            for (Map.Entry<Long, ClientInst> entry : clients.entrySet()) {
+
+                // check ip
+                if (entry.getValue().getIp().equals(ip)) {
+
+                    if (!entry.getValue().connected) {
+
+                        entry.getValue().connected = true;
+                        entry.getValue().listener = listener;
+
+                        log(entry.getValue(), "Reconnected.");
+                        return entry.getValue().getId();
+                    }
+                }
+            }
+
+            // add new
+            ClientInst client = new ClientInst(getNextId(), ip, listener);
+            clients.put(client.getId(), client);
+
+            log(client, "Connected.");
+
+            return client.getId();
+
+        } catch (ServerNotActiveException ex) {
+
+            Logger.getLogger(ServerRemote.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        // Unknown error
+        return -1;
+    }
+
+    /**
+     * Fonction qui deconnecte un client
+     * Ne le supprime pas des listes de clients
+     * @param id : L'id du client à deconnecté
+     * @return indication de deconnexion du client
+     * @throws RemoteException
+     * @since 1.0
+     *
+     */
+    @Override
+    public boolean disconnect(long id) throws RemoteException {
+
+        ClientInst client = clients.get(id);
+
+        log( client, "Disconnect...");
+
+        if (clients.containsKey(id)) {
+
+            clients.get(id).connected = false;
+            clients.get(id).listener = null;
+
+            log( client, "Disconnected.");
+            return true;
+        }
+
+        return false;
+    }
     
     @Override
     public List<Player> getPlayersList(long id) throws RemoteException{
@@ -256,7 +286,7 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         
         if(this.eventsManager.getIsEventRunning()){
             
-            client.pari = b;
+            client.bet = b;
             
             log( client, "bet for "+ b );
             return true;
@@ -272,5 +302,17 @@ public class ServerRemote extends UnicastRemoteObject implements IServerRemote {
         log(this.clients.get(id),"Retrieve event history.");
         
         return this.eventsManager.getHistory();
+    }
+    
+    @Override
+    public Bet getBet(long id) throws RemoteException{
+        
+        return clients.get(id).bet;
+    }
+    
+    @Override
+    public Player getVote(long id) throws RemoteException{
+     
+        return clients.get(id).vote;
     }
 }

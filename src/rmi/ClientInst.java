@@ -10,14 +10,18 @@ public class ClientInst {
 
     private final long id;
     private final String ip;
+    
     /**Indique si le client est connecter (le serveur n'envoie pas de messages 
      * aux clients deconnecter)*/
     public boolean connected;
+    
     public IClientListener listener;
+    
     /**Le joueur pour qui le client à voter.*/
     public Player vote = null; 
+    
     /**Le pari sur le resultat du client*/
-    public Bet pari = null;
+    public Bet bet = null;
 
     /**
      * Constructeur de ClientInst
@@ -30,8 +34,10 @@ public class ClientInst {
 
         this.id = id;
         this.ip = ip;
+        this.connected = true;
         this.listener = listener;
-        connected = true;
+        this.vote = null;
+        this.bet = null;
     }
 
     public String getIp() {

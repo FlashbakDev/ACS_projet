@@ -47,5 +47,9 @@ public interface IServerRemote extends Remote {
      */
     public boolean bet(long id, Bet b) throws RemoteException;
     
+    public Bet getBet(long id) throws RemoteException;
+    
+    public Player getVote(long id) throws RemoteException;
+    
     public List<String> getEventHistory(long id)throws RemoteException;
 }

@@ -28,4 +28,10 @@ public class ClientListener extends UnicastRemoteObject implements IClientListen
 
         client.onEventEnd();
     }
+    
+    @Override
+    public void Kick(String message) throws RemoteException{
+        
+        client.onKickedByServer(message);
+    }
 }
